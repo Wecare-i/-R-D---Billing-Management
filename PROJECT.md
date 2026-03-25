@@ -11,7 +11,7 @@
 | **Microsoft** | Azure subscription 1 | `b230aef2-52a0-4800-8a8d-91a6880c86a2` | Cloud services chính |
 | **Microsoft** | ACC Subscription | `cc7e658b-6dcb-45b0-9646-71792cab759` | Azure Consumption Commitment (MACC) |
 | **Microsoft** | Microsoft 365 / Power Platform | — | Licenses (MOSA `wecare.com.vn`) |
-| **Google** | Google Workspace / Services | — | (cần xác nhận chi tiết) |
+| **Google** | Google Workspace / Services | Billing Account `01E5FF-07AFF5-FD37C5` | Org: `wecare-i.com`, Paid account từ 11/02/2025 |
 
 #### Billing Portals — Nơi kiểm tra hóa đơn
 
@@ -79,6 +79,31 @@
 #### Tech Stack
 - Python 3 + `openpyxl` — ghi data vào Excel
 - CSV — format trung gian để đọc/fill data nhanh
+- **Power BI** — dashboard report (data từ CSV/API)
+- DAX Measures — 20 measures cho KPIs, trends, drill-down
+
+#### API Connections — Lấy Data Tự Động
+
+| Vendor | API | Auth | Service Principal / SA | Status |
+|---|---|---|---|---|
+| **Azure** | Azure Cost Management API | Service Principal (OAuth) | `Admin_WECARE` (`68e90e4b-610c-4657-9d59-4d789853103f`) | ✅ Hoạt động — role `Cost Management Reader` |
+| **Microsoft** | Microsoft Graph API | MSAL (OAuth) | App Registration `68e90e4b` | ✅ Hoạt động — `Directory.Read.All` |
+| **Google** | Cloud Billing API | Service Account (JSON key) | `studio-key@wecare-ai-studio.iam.gserviceaccount.com` | ✅ Đã setup — role `Billing Account Viewer` |
+
+**Google Cloud Billing API — Chi tiết kết nối:**
+
+| Thông tin | Giá trị |
+|---|---|
+| Billing Account ID | `01E5FF-07AFF5-FD37C5` |
+| Organization | `wecare-i.com` |
+| API Endpoint | `cloudbilling.googleapis.com` |
+| Service Account | `studio-key@wecare-ai-studio.iam.gserviceaccount.com` |
+| Client ID | `109523826902655221841` |
+| Key file | `gcp-sa-key.json` (gitignored) |
+| Projects linked | `Project-2025` (`project-2025-449801`), `Wecare AI Studio` (`wecare-ai-studio`) |
+| Role | `Billing Account Viewer` |
+
+> ⚠️ Key file `gcp-sa-key.json` nằm ở root folder — **KHÔNG commit lên git** (đã gitignored).
 
 #### Quy trình hoạt động
 
@@ -167,6 +192,9 @@ Tech_Bảng kê chi phí_T{tháng}.{năm}.xlsx
 - [ ] Lên plan chi tiết migrate MOSA → MCA (Step 3 từ MS Support)
 
 **🔮 Tương lai:**
-- [ ] Build MCP / Skill lấy billing data tự động từ Azure + Google (sau khi fix quyền API)
+- [x] ~~Build MCP / Skill lấy billing data tự động từ Azure~~ → Azure Cost MCP hoạt động ✅ (2026-03-24)
+- [x] Setup Google Cloud Billing API → Service account + role assigned ✅ (2026-03-25)
+- [ ] Build MCP Google Billing cost (dùng `studio-key` SA)
 - [ ] Theo dõi hạn mức thẻ cty hàng tháng
+- [ ] Power BI report → publish lên Power BI Service → share team R&D
 

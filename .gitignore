@@ -1,3 +1,7 @@
+# Credentials - SENSITIVE
+gcp-sa-key.json
+*.credentials.json
+
 # Invoices - sensitive billing documents
 invoices/
 
