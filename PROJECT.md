@@ -10,7 +10,7 @@
 |---|---|---|---|
 | **Microsoft** | Azure subscription 1 | `b230aef2-52a0-4800-8a8d-91a6880c86a2` | Cloud services chính |
 | **Microsoft** | ACC Subscription | `cc7e658b-6dcb-45b0-9646-71792cab759` | Azure Consumption Commitment (MACC) |
-| **Microsoft** | Microsoft 365 / Power Platform | — | Licenses (MOSA `wecare.com.vn`) |
+| **Microsoft** | Microsoft 365 / Power Platform | — | ~~Licenses (MOSA `wecare.com.vn`)~~ — **ĐÃ HỦY** |
 | **Google** | Google Workspace / Services | Billing Account `01E5FF-07AFF5-FD37C5` | Org: `wecare-i.com`, Paid account từ 11/02/2025 |
 
 #### Billing Portals — Nơi kiểm tra hóa đơn
