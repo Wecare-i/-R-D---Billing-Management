@@ -1,0 +1,557 @@
+/*
+ * ============================================
+ * 📊 DATA REPORT THEME — Slate & Indigo
+ * ============================================
+ * Extracted from: Báo cáo so sánh dữ liệu KT & VH 2025
+ * Created: 2026-03-23
+ * 
+ * USAGE:
+ *   1. Import this CSS: <link rel="stylesheet" href="report-theme.css">
+ *   2. Default = Dark mode (body has no class)
+ *   3. Light mode = add class "light" to <body>
+ *      <body class="light">
+ *   4. Toggle via JS:
+ *      document.body.classList.toggle('light')
+ *
+ * COLOR SYSTEM (Tailwind Slate palette based):
+ *   --bg-base:    Page background
+ *   --bg-card:    Card / panel background
+ *   --bg-hover:   Row hover
+ *   --border:     Subtle borders
+ *   --text:       Primary text
+ *   --text-muted: Secondary text
+ *   --text-dim:   Tertiary text (labels, indexes)
+ *   --accent:     Primary accent (Indigo / Wecare Blue)
+ *   --accent-soft: Accent for summary
+ *   --dv:         Dataverse color
+ *   --fb:         Fabric / Green source
+ *   --bq:         BigQuery / Yellow source
+ *   --ok:         Match / Success
+ *   --warn:       Warning / Diff
+ *   --error:      Error / Negative diff
+ *   --mono:       Monospace text (table names)
+ * ============================================
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&family=Roboto:wght@300;400;500;700&display=swap");
+
+/* ==========================================
+   🌙 DARK MODE (default)
+   ========================================== */
+:root {
+  /* Backgrounds */
+  --bg-base: #020617;
+  --bg-card: #0f172a;
+  --bg-group: #0b1220;
+  --bg-hover: #0b1526;
+  --bg-row-border: #0c1120;
+
+  /* Borders */
+  --border: #1e293b;
+  --border-input: #334155;
+
+  /* Text */
+  --text: #e2e8f0;
+  --text-heading: #ffffff;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --text-index: #475569;
+
+  /* Accent — Indigo */
+  --accent: #6366f1;
+  --accent-soft: #a5b4fc;
+  --accent-bg: #6366f122;
+
+  /* Data source colors */
+  --dv: #818cf8;       /* Dataverse — Light Indigo */
+  --fb: #34d399;       /* Fabric Bronze — Emerald */
+  --bq: #fbbf24;       /* BigQuery — Amber */
+
+  /* Status colors */
+  --ok: #4ade80;
+  --ok-bg: #14532d33;
+  --ok-border: #14532d;
+
+  --warn: #fbbf24;
+  --warn-bg: #78350f33;
+  --warn-border: #78350f;
+
+  --diff: #f59e0b;
+  --error: #f87171;
+
+  --zero: #22c55e;
+
+  --na-text: #64748b;
+  --na-bg: #1e293b;
+  --na-border: #334155;
+
+  /* Monospace */
+  --mono: #93c5fd;
+
+  /* Component */
+  --badge-ok-bg: #14532d33;
+  --badge-ok-text: #4ade80;
+  --badge-ok-border: #166534;
+
+  /* Shadows */
+  --shadow: none;
+}
+
+/* ==========================================
+   ☀️ LIGHT MODE — Wecare Brand Guidelines
+   ------------------------------------------
+   Primary:  Wecare Blue #3492AB
+   Success:  #4CAF50
+   Font:     Lexend (headings) + Roboto (body)
+   ========================================== */
+body.light {
+  /* Backgrounds — Wecare Off White */
+  --bg-base: #F8F9FA;
+  --bg-card: #ffffff;
+  --bg-group: #E8F4F8;       /* Wecare blue tint for group rows */
+  --bg-hover: #F0F9FB;       /* Very subtle Wecare blue hover */
+  --bg-row-border: #E5E7EB;  /* Wecare border color */
+
+  /* Borders — Wecare Light Grey */
+  --border: #E5E7EB;
+  --border-input: #D1D5DB;
+
+  /* Text */
+  --text: #343440;           /* Wecare Charcoal */
+  --text-heading: #1A5C6E;   /* Wecare Deep Blue — headings */
+  --text-muted: #6B7280;     /* Wecare Medium Grey */
+  --text-dim: #9CA3AF;
+  --text-index: #9CA3AF;
+
+  /* Accent — Wecare Blue */
+  --accent: #3492AB;
+  --accent-soft: #1E6E82;    /* Wecare Dark Blue */
+  --accent-bg: #3492AB18;
+
+  /* Data source colors (adjusted for light bg contrast) */
+  --dv: #3492AB;             /* Dataverse = Wecare Blue */
+  --fb: #059669;             /* Fabric = Emerald (good contrast) */
+  --bq: #B45309;             /* BigQuery = Amber dark */
+
+  /* Status — Wecare Success Green */
+  --ok: #4CAF50;
+  --ok-bg: #E8F5E9;
+  --ok-border: #A5D6A7;
+
+  /* Warning */
+  --warn: #D97706;
+  --warn-bg: #FEF3C7;
+  --warn-border: #FCD34D;
+
+  --diff: #D97706;
+  --error: #DC2626;
+
+  --zero: #4CAF50;           /* Wecare Success Green */
+
+  --na-text: #9CA3AF;
+  --na-bg: #F1F5F9;
+  --na-border: #E5E7EB;
+
+  /* Monospace text */
+  --mono: #1E6E82;           /* Wecare Dark Blue */
+
+  /* Badge */
+  --badge-ok-bg: #E8F5E9;
+  --badge-ok-text: #4CAF50;
+  --badge-ok-border: #A5D6A7;
+
+  /* Shadows */
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+  /* Fonts — override to Wecare brand */
+  --font-heading: 'Lexend', Arial, sans-serif;
+  --font-body: 'Roboto', sans-serif;
+}
+
+/* ==========================================
+   BASE STYLES
+   ========================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  background: var(--bg-base);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 20px;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* Light mode: switch to Wecare typography */
+body.light {
+  font-family: var(--font-body, 'Roboto', sans-serif);
+}
+
+body.light .header h1,
+body.light .stat-card .val,
+body.light .badge-ok-big {
+  font-family: var(--font-heading, 'Lexend', Arial, sans-serif);
+}
+
+/* ==========================================
+   HEADER
+   ========================================== */
+.header {
+  text-align: center;
+  padding: 32px 0 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+}
+
+.header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-heading);
+  letter-spacing: -0.5px;
+}
+
+.header p {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-top: 8px;
+  line-height: 1.6;
+}
+
+.header strong {
+  color: var(--accent);
+}
+
+/* ==========================================
+   BADGE (big result badge)
+   ========================================== */
+.badge-ok-big {
+  display: inline-block;
+  background: var(--badge-ok-bg);
+  color: var(--badge-ok-text);
+  border: 1px solid var(--badge-ok-border);
+  border-radius: 8px;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+/* ==========================================
+   STATS GRID
+   ========================================== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.stat-card .val {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.stat-card .lbl {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ==========================================
+   INFO BAR
+   ========================================== */
+.info-bar {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  box-shadow: var(--shadow);
+}
+
+.info-bar strong {
+  color: var(--accent);
+}
+
+/* ==========================================
+   SEARCH BAR
+   ========================================== */
+.search-bar {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-input);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  margin-bottom: 16px;
+  transition: border-color 0.2s, background 0.3s;
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.search-bar::placeholder {
+  color: var(--text-dim);
+}
+
+/* ==========================================
+   FILTER BUTTONS
+   ========================================== */
+.filter-btns {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.fbtn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-input);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.fbtn.active,
+.fbtn:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ==========================================
+   TABLE
+   ========================================== */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead tr {
+  background: var(--bg-card);
+}
+
+th {
+  padding: 11px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--bg-row-border);
+  transition: background 0.1s;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover td {
+  background: var(--bg-hover);
+}
+
+/* ==========================================
+   TABLE CELL CLASSES
+   ========================================== */
+.tname {
+  font-family: ui-monospace, "Cascadia Code", "Fira Code", monospace;
+  color: var(--mono);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Data source column colors */
+.dv { color: var(--dv); }
+.fb { color: var(--fb); }
+.bq { color: var(--bq); }
+
+/* Diff display */
+.zero {
+  color: var(--zero);
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.diff-num,
+.diff-pos {
+  color: var(--diff);
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.diff-neg {
+  color: var(--error);
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.na {
+  color: var(--na-text);
+  font-size: 11px;
+  font-style: italic;
+}
+
+/* ==========================================
+   STATUS PILLS
+   ========================================== */
+.pill-ok {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: var(--ok-bg);
+  color: var(--ok);
+  border: 1px solid var(--ok-border);
+}
+
+.pill-diff {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: var(--warn-bg);
+  color: var(--warn);
+  border: 1px solid var(--warn-border);
+}
+
+.pill-na {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: var(--na-bg);
+  color: var(--na-text);
+  border: 1px solid var(--na-border);
+}
+
+/* ==========================================
+   GROUP HEADER ROW
+   ========================================== */
+.group-header td {
+  background: var(--bg-group);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  padding: 7px 14px;
+  text-transform: uppercase;
+  border-top: 1px solid var(--border);
+}
+
+/* ==========================================
+   SUMMARY ROW
+   ========================================== */
+.sum-row td {
+  background: var(--bg-card);
+  font-weight: 700;
+  border-top: 2px solid var(--accent);
+  font-size: 13px;
+}
+
+.sum-row .num {
+  color: var(--accent-soft);
+}
+
+/* ==========================================
+   THEME TOGGLE BUTTON (optional)
+   ========================================== */
+.theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-input);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  z-index: 100;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ==========================================
+   UTILITY: hidden
+   ========================================== */
+.hidden {
+  display: none;
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+@media (max-width: 640px) {
+  body {
+    padding: 12px;
+  }
+  .header h1 {
+    font-size: 18px;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .stat-card .val {
+    font-size: 20px;
+  }
+}

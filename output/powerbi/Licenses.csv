@@ -1,0 +1,22 @@
+SKU,DisplayName,Status,Assigned,Total,UsagePercent,UnitPrice_USD,MonthlyCost_USD,IsPaid
+POWERAPPS_PER_USER,Power Apps per user,Enabled,3,3,100,20.00,60.00,Yes
+O365_BUSINESS_PREMIUM,Microsoft 365 Business Premium,Enabled,2,1,200,22.00,44.00,Yes
+FLOW_PER_USER,Power Automate per user,Enabled,1,1,100,15.00,15.00,Yes
+PBI_PREMIUM_PER_USER,Power BI Premium Per User,Enabled,4,4,100,0.00,0.00,Free Trial
+POWERAPPS_VIRAL,Power Apps Viral,Enabled,810,10000,8,0.00,0.00,No
+POWER_BI_STANDARD,Power BI Free,Enabled,723,1000000,0,0.00,0.00,No
+FLOW_FREE,Power Automate Free,Enabled,55,10000,1,0.00,0.00,No
+TEAMS_ESSENTIALS_AAD,Teams Essentials AAD,Enabled,37,0,0,0.00,0.00,No
+Microsoft_Teams_Exploratory_Dept,Teams Exploratory,Enabled,35,35,100,0.00,0.00,No
+CCIBOTS_PRIVPREV_VIRAL,Copilot Studio Viral,Enabled,10,10000,0,0.00,0.00,No
+POWERAPPS_DEV,Power Apps Dev,Enabled,9,10000,0,0.00,0.00,No
+VIRTUAL_AGENT_USL,Virtual Agent USL,Suspended,6,0,0,0.00,0.00,No
+Power_Pages_vTrial_for_Makers,Power Pages vTrial,Enabled,3,10000,0,0.00,0.00,No
+Teams_Premium_(for_Departments),Teams Premium Dept,Enabled,3,3,100,0.00,0.00,No
+Dynamics_365_Customer_Service_Enterprise_viral_trial,D365 CS Trial,Enabled,2,10000,0,0.00,0.00,No
+Dynamics_365_Sales_Premium_Viral_Trial,D365 Sales Trial,Enabled,2,10000,0,0.00,0.00,No
+DYN365_CUSTOMER_INSIGHTS_VIRAL,D365 CI Viral,Enabled,2,10000,0,0.00,0.00,No
+Dynamics_365_Intelligent_Order_Management_vTrial,D365 IOM Trial,Enabled,1,10000,0,0.00,0.00,No
+SPZA_IW,AppSource Free,Enabled,1,10000,0,0.00,0.00,No
+AX7_USER_TRIAL,D365 F&O Trial,Enabled,1,10000,0,0.00,0.00,No
+MICROSOFT_AGENT_365_TIER_3,Microsoft Agent 365 T3,Enabled,0,25,0,0.00,0.00,No

@@ -1,0 +1,4 @@
+Vendor,Service,MonthlyCost_USD,PaymentCard,VoucherType,BillingPortal,DataSource
+Microsoft,Azure Subscription 1,varies,MC ****6249 (cty),BKCP,portal.azure.com,Azure Cost Management API
+Microsoft,M365 Licenses (MOSA),119.00,Visa ****6073 (Khôi),ĐNTT,admin.microsoft.com,Microsoft Graph API
+Google,Google Workspace,varies,Visa ****6073 (Khôi),ĐNTT,console.cloud.google.com,Manual

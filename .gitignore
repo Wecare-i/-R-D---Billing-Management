@@ -1,0 +1,16 @@
+# Invoices - sensitive billing documents
+invoices/
+
+# Excel output files (generated, can be re-created)
+output/*.xlsx
+
+# Template Excel (binary, keep CSV version)
+templates/*.xlsx
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db

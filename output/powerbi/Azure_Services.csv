@@ -1,0 +1,19 @@
+Month,Service,Cost_USD
+2026-01,Virtual Machines,268.53
+2026-01,Microsoft Fabric,104.36
+2026-01,Storage,30.39
+2026-01,Virtual Network,29.76
+2026-01,Foundry Models,0.05
+2026-01,Bandwidth,0.01
+2026-02,Microsoft Fabric,755.52
+2026-02,Virtual Machines,242.46
+2026-02,Storage,30.34
+2026-02,Virtual Network,26.88
+2026-02,Foundry Models,0.04
+2026-02,Bandwidth,0.01
+2026-03,Microsoft Fabric,732.26
+2026-03,Virtual Machines,198.88
+2026-03,Storage,22.57
+2026-03,Virtual Network,22.06
+2026-03,Foundry Models,0.10
+2026-03,Bandwidth,0.01

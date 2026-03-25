@@ -1,0 +1,16 @@
+Resource,ResourceType,ResourceGroup,Cost_USD,Month
+wecaredb,capacities,wecare,732.26,2026-03
+ecommerce,virtualmachines,wecare.ecommerce_group,105.77,2026-03
+wecare-ai-dev,virtualmachines,wecare-ai-dev_group,52.89,2026-03
+hr-vm,virtualmachines,hr,40.22,2026-03
+hr-vm_osdisk,disks,hr,14.62,2026-03
+wecare-ai-dev_osdisk,disks,wecare-ai-dev_group,3.92,2026-03
+ecommerce_osdisk,disks,wecare.ecommerce_group,3.92,2026-03
+wecare-ai-dev-ip,publicipaddresses,wecare-ai-dev_group,2.77,2026-03
+dev.ecommerce-ip,publicipaddresses,wecare.ecommerce_group,2.77,2026-03
+ecommerce-ip,publicipaddresses,wecare.ecommerce_group,2.77,2026-03
+hr-vm-ip,publicipaddresses,hr,2.76,2026-03
+wecare-ai-ip,publicipaddresses,wecare-ai-dev_group,2.76,2026-03
+dev-ip,publicipaddresses,wecare.ecommerce_group,2.76,2026-03
+myvm-vnet-ip,publicipaddresses,wecare.ecommerce_group,2.76,2026-03
+wecare.ecommerce-ip,publicipaddresses,wecare.ecommerce_group,2.76,2026-03

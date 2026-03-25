@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wecare Tech — Billing Dashboard</title>
+  <link rel="stylesheet" href="report-theme.css">
+  <link rel="stylesheet" href="chart-palette.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+  <style>
+    /* ===== Report-specific overrides ===== */
+    body { padding: 0; }
+    body.light { padding: 0; }
+
+    /* Gradient header for billing dashboard */
+    .billing-header {
+      background: linear-gradient(135deg, var(--accent) 0%, #1A5C6E 100%);
+      color: white;
+      padding: 28px 24px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    body.light .billing-header {
+      background: linear-gradient(135deg, #3492AB 0%, #1A5C6E 100%);
+    }
+    .billing-header::before {
+      content: '';
+      position: absolute;
+      top: -50%; right: -10%;
+      width: 400px; height: 400px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+    }
+    .billing-header-inner {
+      position: relative; z-index: 1;
+      max-width: 1280px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .billing-header h1 {
+      font-size: 26px; font-weight: 700;
+      color: #fff; margin-bottom: 4px;
+      letter-spacing: -0.5px;
+    }
+    .billing-header .sub { opacity: 0.85; font-size: 13px; }
+    .billing-header .meta {
+      display: flex; gap: 20px; margin-top: 12px;
+      font-size: 12px; opacity: 0.8; flex-wrap: wrap;
+    }
+    .billing-header .meta span {
+      display: flex; align-items: center; gap: 5px;
+    }
+
+    /* Auth buttons */
+    .auth-bar {
+      display: flex; gap: 8px; align-items: center;
+      flex-shrink: 0;
+    }
+    .auth-btn {
+      padding: 8px 16px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.12);
+      color: #fff; font-size: 12px;
+      font-family: inherit; cursor: pointer;
+      transition: background 0.15s;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .auth-btn:hover { background: rgba(255,255,255,0.22); }
+    .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Status bar */
+    .api-status-bar {
+      max-width: 1280px; margin: 0 auto;
+      padding: 10px 24px;
+      display: flex; gap: 12px; flex-wrap: wrap;
+    }
+
+    /* Content wrapper */
+    .content { max-width: 1280px; margin: 0 auto; }
+
+    /* KPI strip override — larger for billing */
+    .kpi-strip .kpi-card { min-width: 140px; padding: 12px 20px; }
+    .kpi-strip .kpi-value { font-size: 24px; }
+    .kpi-strip .kpi-sub {
+      font-size: 10px; color: var(--text-dim);
+      margin-top: 4px;
+    }
+    .kpi-sub.up { color: var(--status-error); }
+    .kpi-sub.down { color: var(--status-ok); }
+
+    /* Section label */
+    .section-label {
+      padding: 0 24px;
+      margin-top: 24px; margin-bottom: 8px;
+      font-size: 15px; font-weight: 600;
+      color: var(--accent);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-label::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--border); margin-left: 12px;
+    }
+
+    /* Table card wrapper */
+    .table-section { padding: 0 24px; margin-bottom: 8px; }
+
+    /* Alerts grid */
+    .alerts-outer { padding: 0 24px; }
+    .alerts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+    .alert-item {
+      display: flex; gap: 10px; padding: 12px 14px;
+      border-radius: 8px; border-left: 4px solid;
+      font-size: 12px; line-height: 1.5;
+      background: var(--bg-card); border-color: var(--status-warn);
+    }
+    .alert-item.error { border-color: var(--status-error); }
+    .alert-item.info { border-color: var(--accent); }
+    .alert-item .alert-icon { font-size: 16px; flex-shrink: 0; }
+    .alert-item b { color: var(--text); }
+    .alert-item code {
+      background: var(--bg-base); padding: 1px 5px;
+      border-radius: 4px; font-size: 11px;
+    }
+
+    /* Payment cards */
+    .pay-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px; padding: 0 24px;
+    }
+    .pay-card {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px; box-shadow: var(--shadow);
+    }
+    .pay-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; background: var(--accent-bg);
+    }
+    .pay-info h4 { font-size: 13px; font-weight: 600; color: var(--text); }
+    .pay-info p { font-size: 11px; color: var(--text-muted); }
+
+    /* Footer */
+    .billing-footer {
+      text-align: center; padding: 32px 24px;
+      font-size: 11px; color: var(--text-dim);
+    }
+    .billing-footer a { color: var(--accent); text-decoration: none; }
+
+    /* Badge styles for table */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 2px 8px; border-radius: 20px;
+      font-size: 10px; font-weight: 600;
+    }
+    .badge-bkcp { background: var(--accent-bg); color: var(--accent); }
+    .badge-dntt { background: var(--warn-bg); color: var(--warn); }
+    .badge-mixed { background: #6366f122; color: #a78bfa; }
+    body.light .badge-mixed { background: #7c3aed18; color: #7c3aed; }
+
+    /* Skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, var(--border) 25%, var(--bg-hover) 50%, var(--border) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 6px; height: 24px; width: 100px;
+    }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+    @media (max-width: 768px) {
+      .billing-header-inner { flex-direction: column; }
+      .billing-header h1 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body class="light">
+
+  <!-- ZONE 0: Header -->
+  <div class="billing-header">
+    <div class="billing-header-inner">
+      <div>
+        <h1>💰 Billing Dashboard</h1>
+        <div class="sub">Wecare Tech (R&D/Core) — Tổng hợp chi phí hàng tháng</div>
+        <div class="meta">
+          <span>📅 <span id="period">—</span></span>
+          <span>🕐 <span id="scan-date">—</span></span>
+          <span>👤 <span id="user-name">Chưa đăng nhập</span></span>
+        </div>
+      </div>
+      <div class="auth-bar">
+        <button class="theme-toggle" onclick="document.body.classList.toggle('light')" style="position:static;color:#fff;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3)">🌓</button>
+        <button class="auth-btn" id="btn-login" onclick="handleLogin()">🔐 Đăng nhập</button>
+        <button class="auth-btn" id="btn-refresh" onclick="handleRefresh()" disabled>🔄 Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- API Status -->
+  <div class="api-status-bar" id="status-bar"></div>
+
+  <div class="content">
+    <!-- ZONE 1: KPI Strip -->
+    <div class="kpi-strip" id="kpi-strip">
+      <div class="kpi-card"><div class="kpi-value"><div class="skeleton"></div></div><div class="kpi-label">Tổng chi phí</div></div>
+      <div class="kpi-card"><div class="kpi-value"><div class="skeleton"></div></div><div class="kpi-label">Azure</div></div>
+      <div class="kpi-card"><div class="kpi-value"><div class="skeleton"></div></div><div class="kpi-label">Google</div></div>
+      <div class="kpi-card"><div class="kpi-value"><div class="skeleton"></div></div><div class="kpi-label">M365</div></div>
+    </div>
+
+    <!-- ZONE 2: Main Charts -->
+    <div class="section-label">📈 Xu hướng chi phí</div>
+    <div class="chart-grid">
+      <div class="chart-panel" style="grid-column: span 2">
+        <div class="chart-panel-title">Chi phí theo tháng (USD)</div>
+        <canvas id="monthlyChart" class="chart-canvas"></canvas>
+      </div>
+      <div class="chart-panel">
+        <div class="chart-panel-title">Phân bổ tháng hiện tại</div>
+        <canvas id="serviceChart" class="chart-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- ZONE 3: Breakdown Table -->
+    <div class="section-label">📋 Chi tiết theo tháng</div>
+    <div class="table-section">
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Tháng</th><th class="num">Azure</th><th class="num">Google</th>
+            <th class="num">M365</th><th class="num">Tổng</th>
+            <th>Thẻ</th><th>Phiếu</th>
+          </tr></thead>
+          <tbody id="breakdown-body">
+            <tr><td colspan="7" style="text-align:center;color:var(--text-dim)">Đăng nhập để tải dữ liệu...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ZONE 4: License Breakdown -->
+    <div class="section-label">🔑 Licenses đang trả phí</div>
+    <div class="breakdown-grid" id="license-grid">
+      <div class="breakdown-panel"><div class="skeleton"></div></div>
+    </div>
+
+    <!-- Alerts -->
+    <div class="section-label">⚠️ Cảnh báo</div>
+    <div class="alerts-outer"><div class="alerts-grid" id="alerts-grid"></div></div>
+
+    <!-- Payment -->
+    <div class="section-label">💳 Phương thức thanh toán</div>
+    <div class="pay-grid" id="payment-grid"></div>
+  </div>
+
+  <div class="billing-footer">
+    Generated by <a href="#">Antigravity</a> — Wecare Tech Billing Management<br>
+    Data: Azure Cost Management API · Microsoft Graph API · Google Workspace (manual)
+  </div>
+
+  <script>
+    // =========================================================
+    //  CONFIG
+    // =========================================================
+    const CONFIG = {
+      clientId: '68e90e4b-610c-4657-9d59-4d789853103f',
+      tenantId: '08dd70ab-ac3b-4a33-acd1-ef3fe1729e61',
+      redirectUri: window.location.origin + window.location.pathname,
+      subscriptionId: 'b230aef2-52a0-4800-8a8d-91a6880c86a2',
+      azureScopes: ['https://management.azure.com/user_impersonation'],
+      graphScopes: ['https://graph.microsoft.com/Directory.Read.All'],
+      googleBills: [
+        { month: '2026-01', amount: 0 },
+        { month: '2026-02', amount: 0 },
+        { month: '2026-03', amount: 471.26 }
+      ],
+      billMeta: {
+        '2026-01': { card: 'Visa ****6073 (Khôi)', type: 'ĐNTT' },
+        '2026-02': { card: 'MC ****6249 (cty)', type: 'BKCP' },
+        '2026-03': { card: 'MC ****6249 + Visa ****6073', type: 'BKCP + ĐNTT' }
+      },
+      licensePrices: {
+        'POWERAPPS_PER_USER': 20.00,
+        'O365_BUSINESS_PREMIUM': 22.00,
+        'FLOW_PER_USER': 15.00,
+        'PBI_PREMIUM_PER_USER': 20.00
+      }
+    };
+
+    // =========================================================
+    //  STATE
+    // =========================================================
+    let msalInstance = null, currentAccount = null;
+    let chartMonthly = null, chartService = null;
+    const apiStatus = {
+      azure: { status: 'pending', label: 'Azure Cost' },
+      graph: { status: 'pending', label: 'MS Graph' },
+      google: { status: 'manual', label: 'Google' }
+    };
+    const D = {
+      azureMonthlyCosts: [], azureServiceCosts: [],
+      azureCurrentMonth: 0, azureForecast: 0,
+      licenses: [], totalLicenseCost: 0, alerts: []
+    };
+
+    // =========================================================
+    //  CHART PALETTE — read from CSS variables
+    // =========================================================
+    function getChartColors() {
+      const s = getComputedStyle(document.documentElement);
+      return Array.from({length: 8}, (_, i) => s.getPropertyValue(`--chart-${i+1}`).trim());
+    }
+
+    // =========================================================
+    //  MSAL
+    // =========================================================
+    async function initMSAL() {
+      msalInstance = new msal.PublicClientApplication({
+        auth: {
+          clientId: CONFIG.clientId,
+          authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`,
+          redirectUri: CONFIG.redirectUri
+        },
+        cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: false }
+      });
+      await msalInstance.initialize();
+      const accts = msalInstance.getAllAccounts();
+      if (accts.length > 0) { currentAccount = accts[0]; onLoggedIn(); }
+    }
+
+    async function handleLogin() {
+      if (!msalInstance) return alert('MSAL chưa sẵn sàng...');
+      try {
+        const btn = document.getElementById('btn-login');
+        btn.textContent = '⏳ ...'; btn.disabled = true;
+        const r = await msalInstance.loginPopup({ scopes: [...CONFIG.azureScopes, ...CONFIG.graphScopes] });
+        currentAccount = r.account; onLoggedIn();
+      } catch (e) {
+        console.error(e);
+        const btn = document.getElementById('btn-login');
+        btn.textContent = '🔐 Đăng nhập'; btn.disabled = false;
+        alert('Login thất bại: ' + e.message);
+      }
+    }
+
+    function onLoggedIn() {
+      document.getElementById('btn-login').textContent = '✅ ' + currentAccount.name;
+      document.getElementById('btn-login').disabled = true;
+      document.getElementById('btn-refresh').disabled = false;
+      document.getElementById('user-name').textContent = currentAccount.name;
+      handleRefresh();
+    }
+
+    async function getToken(scopes) {
+      try { return (await msalInstance.acquireTokenSilent({ scopes, account: currentAccount })).accessToken; }
+      catch { return (await msalInstance.acquireTokenPopup({ scopes, account: currentAccount })).accessToken; }
+    }
+
+    // =========================================================
+    //  API FETCHERS
+    // =========================================================
+    async function fetchAzureCosts() {
+      updateStatus('azure', 'loading');
+      try {
+        const token = await getToken(CONFIG.azureScopes);
+        const base = `https://management.azure.com/subscriptions/${CONFIG.subscriptionId}/providers/Microsoft.CostManagement`;
+        const now = new Date();
+
+        // Current month by service
+        const q1 = await fetch(`${base}/query?api-version=2023-11-01`, {
+          method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type:'ActualCost', timeframe:'MonthToDate',
+            dataset: { aggregation: { totalCost: { name:'Cost', function:'Sum' } }, granularity:'None',
+              grouping: [{ type:'Dimension', name:'ServiceName' }] } })
+        });
+        if (!q1.ok) throw new Error(`${q1.status}`);
+        const d1 = await q1.json();
+        D.azureServiceCosts = []; D.azureCurrentMonth = 0;
+        (d1.properties?.rows || []).forEach(r => {
+          D.azureServiceCosts.push({ service: r[1], cost: +(r[0].toFixed(2)) });
+          D.azureCurrentMonth += r[0];
+        });
+        D.azureServiceCosts.sort((a,b) => b.cost - a.cost);
+        D.azureCurrentMonth = +(D.azureCurrentMonth.toFixed(2));
+
+        // Last 3 months
+        const from = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+        const q2 = await fetch(`${base}/query?api-version=2023-11-01`, {
+          method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type:'ActualCost', timeframe:'Custom',
+            timePeriod: { from: from.toISOString().split('T')[0], to: now.toISOString().split('T')[0] },
+            dataset: { aggregation: { totalCost: { name:'Cost', function:'Sum' } }, granularity:'Monthly' } })
+        });
+        if (q2.ok) {
+          const d2 = await q2.json();
+          D.azureMonthlyCosts = (d2.properties?.rows || []).map(r => {
+            const ds = String(r[1]), y = ds.slice(0,4), m = ds.slice(4,6);
+            return { month: `${y}-${m}`, label: `T${m}/${y}`, cost: +(r[0].toFixed(2)) };
+          });
+        }
+
+        // Forecast
+        try {
+          const lastDay = new Date(now.getFullYear(), now.getMonth()+1, 0);
+          const q3 = await fetch(`${base}/forecast?api-version=2023-11-01`, {
+            method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type:'ActualCost', timeframe:'Custom',
+              timePeriod: { from: now.toISOString().split('T')[0], to: lastDay.toISOString().split('T')[0] },
+              dataset: { aggregation: { totalCost: { name:'Cost', function:'Sum' } }, granularity:'Daily' },
+              includeActualCost: true, includeFreshPartialCost: false })
+          });
+          if (q3.ok) {
+            const d3 = await q3.json();
+            D.azureForecast = +((d3.properties?.rows || []).reduce((s,r) => s + r[0], 0).toFixed(2));
+          }
+        } catch(e) { console.warn('Forecast N/A:', e); }
+
+        updateStatus('azure', 'ok');
+      } catch (e) {
+        console.error('Azure:', e); updateStatus('azure', 'fail');
+        D.alerts.push({ sev:'error', icon:'🔴', text:`<b>Azure Cost API</b> thất bại: ${e.message}` });
+      }
+    }
+
+    async function fetchGraphLicenses() {
+      updateStatus('graph', 'loading');
+      try {
+        const token = await getToken(CONFIG.graphScopes);
+        const res = await fetch('https://graph.microsoft.com/v1.0/subscribedSkus', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error(`${res.status}`);
+        const data = await res.json();
+        D.licenses = []; D.totalLicenseCost = 0;
+
+        data.value.filter(s => s.capabilityStatus === 'Enabled' && s.prepaidUnits.enabled > 0).forEach(s => {
+          const price = CONFIG.licensePrices[s.skuPartNumber] || 0;
+          if (price > 0) {
+            const a = s.consumedUnits, t = s.prepaidUnits.enabled;
+            const m = price * a, u = t > 0 ? Math.round(a/t*100) : 0;
+            D.licenses.push({ sku: s.skuPartNumber, name: s.skuPartNumber.replace(/_/g,' '), assigned:a, total:t, unitPrice:price, monthly:m, usage:u });
+            D.totalLicenseCost += m;
+            if (u > 100) D.alerts.push({ sev:'error', icon:'🔴', text:`<b>${s.skuPartNumber}</b> over-assigned: ${a}/${t}` });
+          }
+        });
+        data.value.filter(s => s.capabilityStatus === 'Suspended' && s.consumedUnits > 0).forEach(s => {
+          D.alerts.push({ sev:'warn', icon:'🟡', text:`<b>${s.skuPartNumber}</b> suspended, ${s.consumedUnits} users assigned` });
+        });
+        updateStatus('graph', 'ok');
+      } catch(e) {
+        console.error('Graph:', e); updateStatus('graph', 'fail');
+        D.alerts.push({ sev:'error', icon:'🔴', text:`<b>MS Graph API</b> thất bại: ${e.message}` });
+      }
+    }
+
+    // =========================================================
+    //  REFRESH
+    // =========================================================
+    async function handleRefresh() {
+      const btn = document.getElementById('btn-refresh');
+      btn.disabled = true; btn.textContent = '⏳ ...';
+      D.alerts = [];
+      await Promise.allSettled([fetchAzureCosts(), fetchGraphLicenses()]);
+      document.getElementById('scan-date').textContent = new Date().toLocaleString('vi-VN');
+      document.getElementById('period').textContent = D.azureMonthlyCosts.length >= 2
+        ? `${D.azureMonthlyCosts[0].label} — ${D.azureMonthlyCosts.at(-1).label}`
+        : `T${String(new Date().getMonth()+1).padStart(2,'0')}/${new Date().getFullYear()}`;
+      renderAll();
+      btn.disabled = false; btn.textContent = '🔄 Refresh';
+    }
+
+    // =========================================================
+    //  RENDERERS
+    // =========================================================
+    const $ = id => document.getElementById(id);
+    const usd = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
+
+    function renderAll() { renderKPIs(); renderCharts(); renderTable(); renderLicenses(); renderAlerts(); renderPayments(); }
+
+    function renderKPIs() {
+      const now = new Date();
+      const mk = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+      const g = (CONFIG.googleBills.find(x => x.month === mk) || {}).amount || 0;
+      const total = D.azureCurrentMonth + g + D.totalLicenseCost;
+      const prev = D.azureMonthlyCosts.length >= 2 ? D.azureMonthlyCosts.at(-2) : null;
+      let pct = 0;
+      if (prev) { const pt = prev.cost + D.totalLicenseCost; pct = pt > 0 ? ((total - pt)/pt*100).toFixed(0) : 0; }
+      const forecast = D.azureForecast > 0 ? `FC: ${usd(D.azureForecast)}` : '';
+      $('kpi-strip').innerHTML = [
+        { v: usd(total), l: 'Tổng chi phí', s: pct != 0 ? `${pct > 0 ? '↑':'↓'} ${Math.abs(pct)}% MoM` : '', c: pct > 0 ? 'up':'down' },
+        { v: usd(D.azureCurrentMonth), l: 'Azure', s: forecast, c: '' },
+        { v: usd(g), l: 'Google', s: g > 0 ? '📝 Manual' : '—', c: '' },
+        { v: apiStatus.graph.status === 'ok' ? usd(D.totalLicenseCost) : '—', l: 'M365 Licenses', s: `${D.licenses.length} SKUs`, c: '' }
+      ].map(k => `<div class="kpi-card"><div class="kpi-value">${k.v}</div><div class="kpi-label">${k.l}</div>${k.s ? `<div class="kpi-sub ${k.c}">${k.s}</div>` : ''}</div>`).join('');
+    }
+
+    function renderCharts() {
+      if (chartMonthly) chartMonthly.destroy();
+      if (chartService) chartService.destroy();
+      const colors = getChartColors();
+      const cs = getComputedStyle(document.documentElement);
+
+      Chart.defaults.color = cs.getPropertyValue('--text-muted').trim();
+      Chart.defaults.borderColor = cs.getPropertyValue('--border').trim();
+
+      const months = D.azureMonthlyCosts;
+      if (months.length > 0) {
+        chartMonthly = new Chart($('monthlyChart'), {
+          type: 'bar',
+          data: {
+            labels: months.map(m => m.label),
+            datasets: [
+              { label: 'Azure', data: months.map(m => m.cost), backgroundColor: colors[0], borderRadius: 4, borderSkipped: false },
+              { label: 'Google', data: months.map(m => (CONFIG.googleBills.find(g=>g.month===m.month)||{}).amount||0), backgroundColor: colors[3], borderRadius: 4, borderSkipped: false },
+              { label: 'M365', data: months.map(() => D.totalLicenseCost), backgroundColor: colors[2], borderRadius: 4, borderSkipped: false }
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position:'bottom', labels: { usePointStyle:true, pointStyle:'circle', padding:16, font:{size:11} } },
+              tooltip: { callbacks: { label: c => `${c.dataset.label}: ${usd(c.parsed.y)}` } } },
+            scales: { x: { stacked:true, grid:{display:false} }, y: { stacked:true, grid:{color: cs.getPropertyValue('--border').trim()}, ticks:{callback:v=>'$'+v} } }
+          }
+        });
+      }
+
+      const svcs = D.azureServiceCosts.slice(0, 6);
+      if (svcs.length > 0) {
+        chartService = new Chart($('serviceChart'), {
+          type: 'doughnut',
+          data: {
+            labels: svcs.map(s => s.service),
+            datasets: [{ data: svcs.map(s => s.cost), backgroundColor: colors.slice(0, svcs.length), borderWidth: 0, hoverOffset: 6 }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false, cutout: '60%',
+            plugins: { legend: { position:'bottom', labels: { usePointStyle:true, pointStyle:'circle', padding:12, font:{size:10} } },
+              tooltip: { callbacks: { label: c => { const t = c.dataset.data.reduce((a,b)=>a+b,0); return `${c.label}: ${usd(c.parsed)} (${(c.parsed/t*100).toFixed(1)}%)`; } } } }
+          }
+        });
+      }
+    }
+
+    function renderTable() {
+      const months = D.azureMonthlyCosts;
+      if (!months.length) { $('breakdown-body').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-dim)">Không có dữ liệu</td></tr>'; return; }
+      let ga=0, gg=0, gm=0;
+      const rows = months.map(m => {
+        const g = (CONFIG.googleBills.find(x=>x.month===m.month)||{}).amount||0;
+        const ml = D.totalLicenseCost, total = m.cost+g+ml;
+        ga+=m.cost; gg+=g; gm+=ml;
+        const meta = CONFIG.billMeta[m.month]||{};
+        const badge = !meta.type ? '' : meta.type.includes('+') ? `<span class="badge badge-mixed">${meta.type}</span>` : meta.type==='BKCP' ? `<span class="badge badge-bkcp">${meta.type}</span>` : `<span class="badge badge-dntt">${meta.type}</span>`;
+        return `<tr><td><b>${m.label}</b></td><td class="num">${usd(m.cost)}</td><td class="num">${g>0?usd(g):'—'}</td><td class="num">${usd(ml)}</td><td class="num"><b>${usd(total)}</b></td><td>${meta.card||'—'}</td><td>${badge}</td></tr>`;
+      }).join('');
+      $('breakdown-body').innerHTML = rows + `<tr class="sum-row"><td><b>TỔNG</b></td><td class="num">${usd(ga)}</td><td class="num">${usd(gg)}</td><td class="num">${usd(gm)}</td><td class="num"><b>${usd(ga+gg+gm)}</b></td><td colspan="2"></td></tr>`;
+    }
+
+    function renderLicenses() {
+      if (!D.licenses.length) { $('license-grid').innerHTML = '<div class="breakdown-panel"><span style="color:var(--text-dim)">Chưa có dữ liệu</span></div>'; return; }
+      $('license-grid').innerHTML = D.licenses.map(l => {
+        const pct = Math.min(l.usage,100);
+        const col = l.usage>100 ? 'var(--status-error)' : l.usage===100 ? 'var(--status-warn)' : 'var(--status-ok)';
+        return `<div class="breakdown-panel" style="text-align:left">
+          <div class="breakdown-title">${l.name} ${l.usage>100?'<span class="pill-diff">⚠ Over</span>':''}</div>
+          <div style="font-size:11px;color:var(--text-muted)">Seats: ${l.assigned}/${l.total} · ${usd(l.unitPrice)}/user</div>
+          <div style="font-size:22px;font-weight:700;color:var(--accent);margin:6px 0">${usd(l.monthly)}</div>
+          <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${col};border-radius:3px"></div></div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderAlerts() {
+      if (!D.alerts.length) { $('alerts-grid').innerHTML = '<div class="alert-item info"><span class="alert-icon">✅</span><span>Không có cảnh báo</span></div>'; return; }
+      $('alerts-grid').innerHTML = D.alerts.map(a => `<div class="alert-item ${a.sev}"><span class="alert-icon">${a.icon}</span><span>${a.text}</span></div>`).join('');
+    }
+
+    function renderPayments() {
+      $('payment-grid').innerHTML = [
+        { icon:'💳', name:'MasterCard ****6249', desc:'Thẻ công ty → Bảng kê chi phí (BKCP)' },
+        { icon:'💳', name:'Visa ****6073 (Khôi)', desc:'Thẻ cá nhân CEO → ĐNTT hoàn tiền' }
+      ].map(p => `<div class="pay-card"><div class="pay-icon">${p.icon}</div><div class="pay-info"><h4>${p.name}</h4><p>${p.desc}</p></div></div>`).join('');
+    }
+
+    function updateStatus(k, s) {
+      apiStatus[k].status = s;
+      $('status-bar').innerHTML = Object.values(apiStatus).map(x => {
+        const c = x.status==='ok'?'pill-ok':x.status==='fail'?'pill-diff':'pill-na';
+        const i = x.status==='ok'?'✅':x.status==='fail'?'❌':x.status==='loading'?'⏳':'📝';
+        return `<span class="${c}" style="display:inline-flex;align-items:center;gap:4px">${i} ${x.label}</span>`;
+      }).join('');
+    }
+
+    // =========================================================
+    //  INIT
+    // =========================================================
+    (async () => {
+      updateStatus('google', 'manual');
+      renderPayments();
+      await initMSAL();
+    })();
+  </script>
+</body>
+</html>

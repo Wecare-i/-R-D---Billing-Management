@@ -1,0 +1,165 @@
+// =========================================================
+//  Wecare Billing Dashboard — DAX Measures
+//  Copy paste vào Power BI Desktop → Model View → New Measure
+//  Updated: 2026-03-24 — Data from Azure Cost Management API
+// =========================================================
+
+// ============================================================
+//  TABLE: Monthly_Billing — KPI & Trend Measures
+// ============================================================
+
+// Tổng chi phí tháng hiện tại
+Total Cost = 
+    CALCULATE(
+        SUM('Monthly_Billing'[Total]),
+        LASTDATE('Monthly_Billing'[Month])
+    )
+
+// Azure cost tháng hiện tại
+Azure Cost = 
+    CALCULATE(
+        SUM('Monthly_Billing'[Azure]),
+        LASTDATE('Monthly_Billing'[Month])
+    )
+
+// Google cost tháng hiện tại  
+Google Cost = 
+    CALCULATE(
+        SUM('Monthly_Billing'[Google]),
+        LASTDATE('Monthly_Billing'[Month])
+    )
+
+// M365 License cost tháng hiện tại
+M365 Cost = 
+    CALCULATE(
+        SUM('Monthly_Billing'[M365_Licenses]),
+        LASTDATE('Monthly_Billing'[Month])
+    )
+
+// Azure Forecast (end-of-month estimate)
+Azure Forecast = 
+    CALCULATE(
+        SUM('Monthly_Billing'[Azure_Forecast]),
+        LASTDATE('Monthly_Billing'[Month])
+    )
+
+// Month-over-Month % change
+MoM Change % = 
+    VAR CurrentMonth = [Total Cost]
+    VAR PrevMonth = 
+        CALCULATE(
+            SUM('Monthly_Billing'[Total]),
+            DATEADD('Monthly_Billing'[Month], -1, MONTH)
+        )
+    RETURN
+        IF(
+            PrevMonth > 0,
+            DIVIDE(CurrentMonth - PrevMonth, PrevMonth, 0),
+            BLANK()
+        )
+
+// Grand total all months
+Total All Months = 
+    SUM('Monthly_Billing'[Total])
+
+// Azure total all months
+Azure All Months = 
+    SUM('Monthly_Billing'[Azure])
+
+// ============================================================
+//  TABLE: Azure_Services — Service Breakdown Measures
+// ============================================================
+
+// Tổng cost theo service (dùng với filter Month)
+Service Total = 
+    SUM('Azure_Services'[Cost_USD])
+
+// Top service tháng hiện tại
+Top Service Name = 
+    FIRSTNONBLANK(
+        TOPN(1, ALL('Azure_Services'), 'Azure_Services'[Cost_USD], DESC),
+        'Azure_Services'[Service]
+    )
+
+// Fabric cost (service chi phí cao nhất)
+Fabric Cost = 
+    CALCULATE(
+        SUM('Azure_Services'[Cost_USD]),
+        'Azure_Services'[Service] = "Microsoft Fabric"
+    )
+
+// VM cost
+VM Cost = 
+    CALCULATE(
+        SUM('Azure_Services'[Cost_USD]),
+        'Azure_Services'[Service] = "Virtual Machines"
+    )
+
+// ============================================================
+//  TABLE: Azure_Resources — Resource Drill-Down Measures
+// ============================================================
+
+// Cost per resource
+Resource Cost = 
+    SUM('Azure_Resources'[Cost_USD])
+
+// Top resource name
+Top Resource = 
+    FIRSTNONBLANK(
+        TOPN(1, ALL('Azure_Resources'), 'Azure_Resources'[Cost_USD], DESC),
+        'Azure_Resources'[Resource]
+    )
+
+// Count resources with cost > $10
+Significant Resources = 
+    COUNTROWS(
+        FILTER('Azure_Resources', 'Azure_Resources'[Cost_USD] > 10)
+    )
+
+// ============================================================
+//  TABLE: Licenses — License Measures
+// ============================================================
+
+// Tổng cost license hàng tháng
+Total License Cost = 
+    SUMX(
+        FILTER('Licenses', 'Licenses'[IsPaid] = "Yes"),
+        'Licenses'[MonthlyCost_USD]
+    )
+
+// Số paid SKUs
+Paid SKU Count = 
+    COUNTROWS(FILTER('Licenses', 'Licenses'[IsPaid] = "Yes"))
+
+// Seats over-provisioned
+Over Provisioned Count = 
+    COUNTROWS(
+        FILTER('Licenses', 'Licenses'[UsagePercent] > 100)
+    )
+
+// Tổng seats assigned (paid only)
+Total Paid Seats = 
+    SUMX(
+        FILTER('Licenses', 'Licenses'[IsPaid] = "Yes"),
+        'Licenses'[Assigned]
+    )
+
+// ============================================================
+//  FORMATTING HELPERS
+// ============================================================
+
+// Cost display with $ sign
+Cost Display = 
+    FORMAT([Total Cost], "$#,##0.00")
+
+// MoM arrow indicator
+MoM Indicator = 
+    VAR Change = [MoM Change %]
+    RETURN
+        IF(Change > 0, "↑ " & FORMAT(Change, "0%"),
+        IF(Change < 0, "↓ " & FORMAT(ABS(Change), "0%"),
+        "→ 0%"))
+
+// Azure share % of total
+Azure Share % = 
+    DIVIDE([Azure Cost], [Total Cost], 0)

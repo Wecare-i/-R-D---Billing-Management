@@ -1,0 +1,83 @@
+{
+  "name": "Wecare Billing",
+  "dataColors": [
+    "#3492AB",
+    "#6366f1",
+    "#34d399",
+    "#fbbf24",
+    "#f87171",
+    "#a78bfa",
+    "#f472b6",
+    "#38bdf8"
+  ],
+  "background": "#F8F9FA",
+  "foreground": "#343440",
+  "tableAccent": "#3492AB",
+  "good": "#4CAF50",
+  "neutral": "#F59E0B",
+  "bad": "#EF4444",
+  "maximum": "#EF4444",
+  "center": "#F59E0B",
+  "minimum": "#4CAF50",
+  "textClasses": {
+    "callout": {
+      "fontSize": 28,
+      "fontFace": "Inter",
+      "color": "#343440"
+    },
+    "title": {
+      "fontSize": 14,
+      "fontFace": "Inter",
+      "color": "#343440"
+    },
+    "header": {
+      "fontSize": 12,
+      "fontFace": "Inter",
+      "color": "#64748b"
+    },
+    "label": {
+      "fontSize": 10,
+      "fontFace": "Inter",
+      "color": "#94a3b8"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [
+          {
+            "color": { "solid": { "color": "#FFFFFF" } },
+            "transparency": 0
+          }
+        ],
+        "border": [
+          {
+            "color": { "solid": { "color": "#E2E8F0" } },
+            "show": true
+          }
+        ],
+        "outspace": [{ "top": 8, "bottom": 8, "left": 8, "right": 8 }]
+      }
+    },
+    "card": {
+      "*": {
+        "labels": [
+          {
+            "color": { "solid": { "color": "#3492AB" } },
+            "fontSize": 28
+          }
+        ]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [
+          {
+            "color": { "solid": { "color": "#F8F9FA" } },
+            "transparency": 0
+          }
+        ]
+      }
+    }
+  }
+}
