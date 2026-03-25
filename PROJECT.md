@@ -25,16 +25,10 @@
 
 #### Microsoft Billing Accounts (MCA)
 
-⚠️ Có **3 billing accounts** — phải check từng cái khi tổng hợp invoice:
-
 | # | Billing Account | Billing Account ID | Chứa gì |
 |---|---|---|---|
 | 1 | **Wecare Group Joint Stock Company** | `0e0c45d9-ca8d-5a38-3a11-2e028a0d4f39:4dd47361-7ed3-47bb-b66a-a868713759b6_2019-05-31` | MACC (Azure Consumption Commitment) |
 | 2 | **Công ty cổ phần Wecare Group** | `0e0c45d9-ca8d-5a88-3a11-2e028a0d4f39:0dd97e735-6a3b-4be8-b02a-72f02dbad05b_2019-05-31` | Azure consumption — 13 invoices |
-| 3 | **Hieu Le** | `0e0c45d9-ca8d-5a38-3a11-2e028a0d4f39:d9083e54-b501-494a-8809-471fe8595737_2019-05-31` | Account cá nhân anh Hiếu |
-| 4 | **wecare.com.vn** | (MOSA - legacy) | M365 licenses — ⚠️ **đang charge thẻ Khôi Trần** → cần ĐNTT |
-
-> 📝 M365 Admin Center còn thêm 3 accounts khác (Tiền Trần, Quyen Le, Khoa Tran) — không liên quan Tech, bỏ qua.
 
 #### Tổng hợp billing T03/2026 (all sources)
 
@@ -44,50 +38,28 @@
 | Google Workspace | Google | $471.26 | Visa ****6073 (Khôi) | ĐNTT hoàn tiền |
 | M365 licenses | wecare.com.vn | ~$121.00 | Thẻ Khôi | ĐNTT hoàn tiền |
 
-#### Azure Billing Profile
+#### Azure Billing Profiles
 
-| Thông tin | Giá trị |
-|---|---|
-| Billing profile | Công ty cổ phần Wecare Group |
-| Invoice section | LÊ THỊ NGỌC ANH |
-| Month-to-date (T03) | $648.13 |
-| Last month (T02) | $1,055.49 |
-
-#### Lịch sử billing Azure (từ portal)
-
-| Tháng | Thẻ thanh toán | Invoice ID | Số tiền | Loại phiếu cần lập |
-|---|---|---|---|---|
-| T01/2026 | 🟡 Visa ****6073 (Khôi) | G133744309 | $362.11 | ĐNTT hoàn tiền |
-| T02/2026 | 🔴 MC ****6249 (cty) | G139815737 | $479.69 | Bảng kê chi phí |
-| T03/2026 | 🔴 MC ****6249 (cty) | G145113496 | $1,160.87 | Bảng kê chi phí |
-
-**2 phương thức thanh toán services (Azure, Google...):**
-
-| Thẻ | Chủ thẻ | Loại | Ghi chú |
-|---|---|---|---|
-| **Visa ****6073** | Khôi Trần (CEO) | Thẻ cá nhân | Trước đây dùng chính, nay backup |
-| **MasterCard ****6249** | Công ty | Tín dụng, hạn mức 50tr VNĐ | Dùng chung với Sale/Marketing |
-
-**Quy tắc xử lý:**
-
-| Trường hợp | Hành động | Loại phiếu |
+| # | Billing Profile ID | Billing Profile |
 |---|---|---|
-| Trừ **thẻ công ty** (MasterCard ****6249) | Lập bảng kê khai chi phí → gởi KT | Bảng kê chi phí |
-| Trừ **thẻ Khôi** (Visa ****6073) | Lập ĐNTT hoàn tiền cho Khôi | Đề Nghị Thanh Toán |
-| Thẻ cty hết hạn mức (Sale/Marketing dùng hết) | Báo KT nạp tiền trước billing cycle | ⚠️ Alert KT |
+| 1 | `K7JM-MPGE-BG7-PGB` | Công ty cổ phần Wecare Group |
+| 2 | `FEN6-Y2IZ-BG7-PGB` | (profile 2) |
+
+> Power BI: dùng **Azure Cost Management connector** (built-in) → Choose Scope = `Billing Profile Id` → nhập ID ở trên.
+
+
 
 #### Tech Stack
-- Python 3 + `openpyxl` — ghi data vào Excel
-- CSV — format trung gian để đọc/fill data nhanh
-- **Power BI** — dashboard report (data từ CSV/API)
-- DAX Measures — 20 measures cho KPIs, trends, drill-down
+- **Power BI Desktop** — dashboard report
+  - Built-in **Azure Cost Management connector** (2 Billing Profiles: `K7JM-MPGE-BG7-PGB`, `FEN6-Y2IZ-BG7-PGB`)
+  - Tables loaded: Usage details, Budgets, Balance summary, Charges (bỏ RI tables)
+  - DAX Measures — KPIs, trends, drill-down
 
 #### API Connections — Lấy Data Tự Động
 
 | Vendor | API | Auth | Service Principal / SA | Status |
 |---|---|---|---|---|
 | **Azure** | Azure Cost Management API | Service Principal (OAuth) | `Admin_WECARE` (`68e90e4b-610c-4657-9d59-4d789853103f`) | ✅ Hoạt động — role `Cost Management Reader` |
-| **Microsoft** | Microsoft Graph API | MSAL (OAuth) | App Registration `68e90e4b` | ✅ Hoạt động — `Directory.Read.All` |
 | **Google** | Cloud Billing API | Service Account (JSON key) | `studio-key@wecare-ai-studio.iam.gserviceaccount.com` | ✅ Đã setup — role `Billing Account Viewer` |
 
 **Google Cloud Billing API — Chi tiết kết nối:**
@@ -129,6 +101,7 @@ Billing Management/
 │   ├── T03.2026/           # {Service}_{InvoiceID}.pdf
 │   └── T04.2026/
 ├── output/                 # File đã fill → gởi KT
+│   └── powerbi/            # Power BI data package + API reference
 ├── reference/              # Tài liệu tham khảo, kết quả điều tra chi phí
 │   └── gemini_api_audit.md # Điều tra Gemini API cost spike T03/2026
 ├── scripts/
@@ -142,8 +115,7 @@ Billing Management/
 Tech_Bảng kê chi phí_T{tháng}.{năm}.xlsx
 ```
 
-#### Dependencies
-- `openpyxl` — cài bằng `pip install openpyxl`
+
 
 #### Known Issues
 - Thẻ cty dùng chung Sale/Marketing → risk hết hạn mức khi billing cycle đến
@@ -194,7 +166,10 @@ Tech_Bảng kê chi phí_T{tháng}.{năm}.xlsx
 **🔮 Tương lai:**
 - [x] ~~Build MCP / Skill lấy billing data tự động từ Azure~~ → Azure Cost MCP hoạt động ✅ (2026-03-24)
 - [x] Setup Google Cloud Billing API → Service account + role assigned ✅ (2026-03-25)
+- [x] Bổ sung API Reference chi tiết (Azure, Google, M365) vào `output/powerbi/README.md` ✅ (2026-03-25)
+- [x] Setup Power BI Azure Cost Management connector (Billing Profile `K7JM-MPGE-BG7-PGB`) ✅ (2026-03-25)
 - [ ] Build MCP Google Billing cost (dùng `studio-key` SA)
+- [ ] Setup BigQuery export cho Google Cloud → Power BI BigQuery connector
 - [ ] Theo dõi hạn mức thẻ cty hàng tháng
 - [ ] Power BI report → publish lên Power BI Service → share team R&D
 

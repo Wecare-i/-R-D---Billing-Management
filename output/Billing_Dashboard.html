@@ -127,27 +127,6 @@
       border-radius: 4px; font-size: 11px;
     }
 
-    /* Payment cards */
-    .pay-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 12px; padding: 0 24px;
-    }
-    .pay-card {
-      display: flex; align-items: center; gap: 14px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px; box-shadow: var(--shadow);
-    }
-    .pay-icon {
-      width: 42px; height: 42px; border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px; background: var(--accent-bg);
-    }
-    .pay-info h4 { font-size: 13px; font-weight: 600; color: var(--text); }
-    .pay-info p { font-size: 11px; color: var(--text-muted); }
-
     /* Footer */
     .billing-footer {
       text-align: center; padding: 32px 24px;
@@ -155,16 +134,7 @@
     }
     .billing-footer a { color: var(--accent); text-decoration: none; }
 
-    /* Badge styles for table */
-    .badge {
-      display: inline-flex; align-items: center;
-      padding: 2px 8px; border-radius: 20px;
-      font-size: 10px; font-weight: 600;
-    }
-    .badge-bkcp { background: var(--accent-bg); color: var(--accent); }
-    .badge-dntt { background: var(--warn-bg); color: var(--warn); }
-    .badge-mixed { background: #6366f122; color: #a78bfa; }
-    body.light .badge-mixed { background: #7c3aed18; color: #7c3aed; }
+
 
     /* Skeleton */
     .skeleton {
@@ -236,10 +206,9 @@
           <thead><tr>
             <th>Tháng</th><th class="num">Azure</th><th class="num">Google</th>
             <th class="num">M365</th><th class="num">Tổng</th>
-            <th>Thẻ</th><th>Phiếu</th>
           </tr></thead>
           <tbody id="breakdown-body">
-            <tr><td colspan="7" style="text-align:center;color:var(--text-dim)">Đăng nhập để tải dữ liệu...</td></tr>
+            <tr><td colspan="5" style="text-align:center;color:var(--text-dim)">Đăng nhập để tải dữ liệu...</td></tr>
           </tbody>
         </table>
       </div>
@@ -255,9 +224,7 @@
     <div class="section-label">⚠️ Cảnh báo</div>
     <div class="alerts-outer"><div class="alerts-grid" id="alerts-grid"></div></div>
 
-    <!-- Payment -->
-    <div class="section-label">💳 Phương thức thanh toán</div>
-    <div class="pay-grid" id="payment-grid"></div>
+
   </div>
 
   <div class="billing-footer">
@@ -281,11 +248,7 @@
         { month: '2026-02', amount: 0 },
         { month: '2026-03', amount: 471.26 }
       ],
-      billMeta: {
-        '2026-01': { card: 'Visa ****6073 (Khôi)', type: 'ĐNTT' },
-        '2026-02': { card: 'MC ****6249 (cty)', type: 'BKCP' },
-        '2026-03': { card: 'MC ****6249 + Visa ****6073', type: 'BKCP + ĐNTT' }
-      },
+
       licensePrices: {
         'POWERAPPS_PER_USER': 20.00,
         'O365_BUSINESS_PREMIUM': 22.00,
@@ -482,7 +445,7 @@
     const $ = id => document.getElementById(id);
     const usd = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 });
 
-    function renderAll() { renderKPIs(); renderCharts(); renderTable(); renderLicenses(); renderAlerts(); renderPayments(); }
+    function renderAll() { renderKPIs(); renderCharts(); renderTable(); renderLicenses(); renderAlerts(); }
 
     function renderKPIs() {
       const now = new Date();
@@ -550,17 +513,15 @@
 
     function renderTable() {
       const months = D.azureMonthlyCosts;
-      if (!months.length) { $('breakdown-body').innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-dim)">Không có dữ liệu</td></tr>'; return; }
+      if (!months.length) { $('breakdown-body').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-dim)">Không có dữ liệu</td></tr>'; return; }
       let ga=0, gg=0, gm=0;
       const rows = months.map(m => {
         const g = (CONFIG.googleBills.find(x=>x.month===m.month)||{}).amount||0;
         const ml = D.totalLicenseCost, total = m.cost+g+ml;
         ga+=m.cost; gg+=g; gm+=ml;
-        const meta = CONFIG.billMeta[m.month]||{};
-        const badge = !meta.type ? '' : meta.type.includes('+') ? `<span class="badge badge-mixed">${meta.type}</span>` : meta.type==='BKCP' ? `<span class="badge badge-bkcp">${meta.type}</span>` : `<span class="badge badge-dntt">${meta.type}</span>`;
-        return `<tr><td><b>${m.label}</b></td><td class="num">${usd(m.cost)}</td><td class="num">${g>0?usd(g):'—'}</td><td class="num">${usd(ml)}</td><td class="num"><b>${usd(total)}</b></td><td>${meta.card||'—'}</td><td>${badge}</td></tr>`;
+        return `<tr><td><b>${m.label}</b></td><td class="num">${usd(m.cost)}</td><td class="num">${g>0?usd(g):'—'}</td><td class="num">${usd(ml)}</td><td class="num"><b>${usd(total)}</b></td></tr>`;
       }).join('');
-      $('breakdown-body').innerHTML = rows + `<tr class="sum-row"><td><b>TỔNG</b></td><td class="num">${usd(ga)}</td><td class="num">${usd(gg)}</td><td class="num">${usd(gm)}</td><td class="num"><b>${usd(ga+gg+gm)}</b></td><td colspan="2"></td></tr>`;
+      $('breakdown-body').innerHTML = rows + `<tr class="sum-row"><td><b>TỔNG</b></td><td class="num">${usd(ga)}</td><td class="num">${usd(gg)}</td><td class="num">${usd(gm)}</td><td class="num"><b>${usd(ga+gg+gm)}</b></td></tr>`;
     }
 
     function renderLicenses() {
@@ -582,12 +543,7 @@
       $('alerts-grid').innerHTML = D.alerts.map(a => `<div class="alert-item ${a.sev}"><span class="alert-icon">${a.icon}</span><span>${a.text}</span></div>`).join('');
     }
 
-    function renderPayments() {
-      $('payment-grid').innerHTML = [
-        { icon:'💳', name:'MasterCard ****6249', desc:'Thẻ công ty → Bảng kê chi phí (BKCP)' },
-        { icon:'💳', name:'Visa ****6073 (Khôi)', desc:'Thẻ cá nhân CEO → ĐNTT hoàn tiền' }
-      ].map(p => `<div class="pay-card"><div class="pay-icon">${p.icon}</div><div class="pay-info"><h4>${p.name}</h4><p>${p.desc}</p></div></div>`).join('');
-    }
+
 
     function updateStatus(k, s) {
       apiStatus[k].status = s;
@@ -603,7 +559,6 @@
     // =========================================================
     (async () => {
       updateStatus('google', 'manual');
-      renderPayments();
       await initMSAL();
     })();
   </script>

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wecare Billing — Power BI Draft</title>
+  <link rel="stylesheet" href="report-theme.css">
+  <link rel="stylesheet" href="chart-palette.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    body { padding: 0; margin: 0; }
+
+    /* === PAGE SWITCH === */
+    .tab-page { display: none; }
+    .tab-page.active { display: block; }
+    .page-content { padding: 0 20px 24px; }
+
+    /* === ZONE 1: HEADER (Title left + Filters right — SAME ROW) === */
+    .report-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .report-bar .title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-heading);
+      white-space: nowrap;
+    }
+    .report-bar .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+
+    /* === ZONE 2: KPI STRIP (full-width, centered, pill shape) === */
+    .kpi-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 14px 20px;
+      flex-wrap: wrap;
+      background: var(--bg-base);
+    }
+    .kpi-pill {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 18px;
+      border: 1.5px solid var(--accent);
+      border-radius: 20px;
+      background: rgba(52, 146, 171, 0.08);
+      min-width: 80px;
+    }
+    body.light .kpi-pill { background: rgba(52, 146, 171, 0.06); }
+    .kpi-pill .val {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1.2;
+    }
+    .kpi-pill .lbl {
+      font-size: 8px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-top: 1px;
+    }
+
+    /* === ZONE 3: MAIN CHARTS (4 cols) === */
+    .charts-main {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      padding: 12px 0;
+    }
+
+    /* === ZONE 4: BREAKDOWN (5 cols) === */
+    .charts-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      padding: 0 0 12px;
+    }
+
+    /* === SECTION LABEL === */
+    .sec-lbl {
+      font-size: 11px; font-weight: 600; color: var(--accent);
+      margin: 10px 0 4px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .sec-lbl::after { content:''; flex:1; height:1px; background:var(--border); margin-left:6px; }
+
+    /* === RESOURCE BAR === */
+    .res-item { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .res-name { font-size: 9px; color: var(--text); min-width: 85px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .res-bg { flex: 1; height: 16px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .res-fill { height: 100%; border-radius: 3px; display: flex; align-items: center; padding-left: 4px; font-size: 7px; color: #fff; font-weight: 600; }
+    .res-val { font-size: 9px; color: var(--text-muted); min-width: 45px; text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* === LICENSE CARDS === */
+    .lic-mini { display: grid; grid-template-columns: 1fr; gap: 6px; }
+    .lic-m-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+    .lic-m-name { font-size: 10px; font-weight: 600; color: var(--text); }
+    .lic-m-detail { font-size: 8px; color: var(--text-muted); }
+    .lic-m-cost { font-size: 16px; font-weight: 700; color: var(--accent); margin: 2px 0; }
+    .lic-m-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .lic-m-fill { height: 100%; border-radius: 2px; }
+
+    /* === TABLE COMPACT === */
+    .tbl-section { margin-top: 4px; }
+
+    /* === TAGS === */
+    .tag { display: inline-flex; padding: 1px 6px; border-radius: 20px; font-size: 8px; font-weight: 600; }
+    .tag-bkcp { background: var(--accent-bg); color: var(--accent); }
+    .tag-dntt { background: var(--warn-bg); color: var(--warn); }
+    .tag-mix { background: #6366f122; color: #a78bfa; }
+    body.light .tag-mix { background: #7c3aed18; color: #7c3aed; }
+
+    /* === FOOTER === */
+    .bi-footer { text-align: center; padding: 12px; font-size: 8px; color: var(--text-dim); border-top: 1px solid var(--border); }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 1024px) {
+      .charts-main { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 768px) {
+      .report-bar { flex-direction: column; align-items: flex-start; }
+      .charts-main, .charts-breakdown { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =================== PAGE 1: OVERVIEW =================== -->
+  <div id="page-overview" class="tab-page active"><div class="page-content">
+
+    <!-- ZONE 1: Header Bar -->
+    <div class="report-bar">
+      <div class="title">📊 Billing Overview</div>
+      <div class="filters">
+        <div class="filter-group">
+          <span class="filter-label">View</span>
+          <select class="filter-select" title="View" onchange="switchPage(this.value)">
+            <option value="overview" selected>📈 Overview</option>
+            <option value="azure">☁️ Azure Drill-Down</option>
+            <option value="licenses">🔑 Licenses</option>
+          </select>
+        </div>
+        <div class="filter-group"><span class="filter-label">Period</span><select class="filter-select" title="Period"><option>Q1/2026</option><option>T03/2026</option><option>T02/2026</option></select></div>
+        <div class="filter-group"><span class="filter-label">Vendor</span><select class="filter-select" title="Vendor"><option>All</option><option>Azure</option><option>Google</option><option>M365</option></select></div>
+        <div class="toggle-group">
+          <button class="toggle-btn" onclick="setTheme(this,'light')">☀️</button>
+          <button class="toggle-btn active" onclick="setTheme(this,'dark')">🌙</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ZONE 2: KPI Strip (full-width centered) -->
+    <div class="kpi-row">
+      <div class="kpi-pill"><div class="val">$1,566</div><div class="lbl">Tổng T03</div></div>
+      <div class="kpi-pill"><div class="val">$976</div><div class="lbl">Azure</div></div>
+      <div class="kpi-pill"><div class="val">$471</div><div class="lbl">Google</div></div>
+      <div class="kpi-pill"><div class="val">$119</div><div class="lbl">M365</div></div>
+      <div class="kpi-pill"><div class="val">$3,292</div><div class="lbl">Q1 Total</div></div>
+      <div class="kpi-pill"><div class="val">↑33%</div><div class="lbl">MoM</div></div>
+      <div class="kpi-pill"><div class="val">~$1,291</div><div class="lbl">Forecast</div></div>
+    </div>
+
+    <!-- ZONE 3: Main Charts (4 cols) -->
+    <div class="charts-main">
+      <div class="chart-panel"><div class="chart-panel-title">Monthly Cost — Stacked</div><canvas id="c1-bar" class="chart-canvas"></canvas></div>
+      <div class="chart-panel"><div class="chart-panel-title">Revenue by Day — Trend</div><canvas id="c1-trend" class="chart-canvas"></canvas></div>
+      <div class="chart-panel"><div class="chart-panel-title">Vendor Share — T03</div><canvas id="c1-donut" class="chart-canvas"></canvas></div>
+      <div class="chart-panel"><div class="chart-panel-title">Azure vs Others</div><canvas id="c1-hbar" class="chart-canvas"></canvas></div>
+    </div>
+
+    <!-- ZONE 4: Detail Table -->
+    <div class="tbl-section"><div class="table-wrap"><table>
+      <thead><tr><th>Tháng</th><th class="num">Azure</th><th class="num">Google</th><th class="num">M365</th><th class="num">Tổng</th><th>Thẻ</th><th>Phiếu</th></tr></thead>
+      <tbody>
+        <tr><td><b>T01</b></td><td class="num">$433.10</td><td class="num">—</td><td class="num">$119</td><td class="num"><b>$552</b></td><td>Visa ****6073</td><td><span class="tag tag-dntt">ĐNTT</span></td></tr>
+        <tr><td><b>T02</b></td><td class="num">$1,055.25</td><td class="num">—</td><td class="num">$119</td><td class="num"><b>$1,174</b></td><td>MC ****6249</td><td><span class="tag tag-bkcp">BKCP</span></td></tr>
+        <tr><td><b>T03</b></td><td class="num">$975.88</td><td class="num">$471.26</td><td class="num">$119</td><td class="num"><b>$1,566</b></td><td>MC+Visa</td><td><span class="tag tag-mix">Mixed</span></td></tr>
+        <tr class="sum-row"><td><b>Q1</b></td><td class="num">$2,464</td><td class="num">$471</td><td class="num">$357</td><td class="num"><b>$3,292</b></td><td colspan="2"></td></tr>
+      </tbody>
+    </table></div></div>
+  </div></div>
+
+  <!-- =================== PAGE 2: AZURE DRILL-DOWN =================== -->
+  <div id="page-azure" class="tab-page"><div class="page-content">
+    <div class="report-bar">
+      <div class="title">☁️ Azure Drill-Down</div>
+      <div class="filters">
+        <div class="filter-group"><span class="filter-label">View</span><select class="filter-select" title="View" onchange="switchPage(this.value)"><option value="overview">📈 Overview</option><option value="azure" selected>☁️ Azure</option><option value="licenses">🔑 Licenses</option></select></div>
+        <div class="filter-group"><span class="filter-label">Month</span><select class="filter-select" title="Month"><option>T03/2026</option><option>T02/2026</option><option>T01/2026</option></select></div>
+        <div class="filter-group"><span class="filter-label">Service</span><select class="filter-select" title="Service"><option>All</option><option>Fabric</option><option>VMs</option><option>Storage</option></select></div>
+      </div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi-pill"><div class="val">$976</div><div class="lbl">Azure MTD</div></div>
+      <div class="kpi-pill"><div class="val">$732</div><div class="lbl">Fabric</div></div>
+      <div class="kpi-pill"><div class="val">$199</div><div class="lbl">VMs</div></div>
+      <div class="kpi-pill"><div class="val">$45</div><div class="lbl">Infra</div></div>
+      <div class="kpi-pill"><div class="val">~$1,291</div><div class="lbl">Forecast</div></div>
+      <div class="kpi-pill"><div class="val">5</div><div class="lbl">Services</div></div>
+      <div class="kpi-pill"><div class="val">10</div><div class="lbl">Resources</div></div>
+    </div>
+    <div class="charts-main">
+      <div class="chart-panel"><div class="chart-panel-title">Services × Tháng</div><canvas id="c2-svc" class="chart-canvas"></canvas></div>
+      <div class="chart-panel"><div class="chart-panel-title">Service Share — T03</div><canvas id="c2-donut" class="chart-canvas"></canvas></div>
+      <div class="chart-panel"><div class="chart-panel-title">Monthly Azure Trend</div><canvas id="c2-trend" class="chart-canvas"></canvas></div>
+      <div class="chart-panel"><div class="chart-panel-title">Top Resources</div><div id="res-bars" style="padding-top:4px"></div></div>
+    </div>
+    <div class="tbl-section"><div class="table-wrap"><table>
+      <thead><tr><th>Service</th><th class="num">T01</th><th class="num">T02</th><th class="num">T03</th><th class="num">Total</th><th class="num">%</th></tr></thead>
+      <tbody>
+        <tr><td>Microsoft Fabric</td><td class="num">$104</td><td class="num">$756</td><td class="num">$732</td><td class="num"><b>$1,592</b></td><td class="num">65%</td></tr>
+        <tr><td>Virtual Machines</td><td class="num">$269</td><td class="num">$242</td><td class="num">$199</td><td class="num"><b>$710</b></td><td class="num">29%</td></tr>
+        <tr><td>Storage</td><td class="num">$30</td><td class="num">$30</td><td class="num">$23</td><td class="num"><b>$83</b></td><td class="num">3%</td></tr>
+        <tr><td>Virtual Network</td><td class="num">$30</td><td class="num">$27</td><td class="num">$22</td><td class="num"><b>$79</b></td><td class="num">3%</td></tr>
+        <tr><td>Foundry Models</td><td class="num">$0.05</td><td class="num">$0.04</td><td class="num">$0.10</td><td class="num"><b>$0.19</b></td><td class="num">&lt;1%</td></tr>
+        <tr class="sum-row"><td><b>TỔNG</b></td><td class="num">$433</td><td class="num">$1,055</td><td class="num">$976</td><td class="num"><b>$2,464</b></td><td class="num">100%</td></tr>
+      </tbody>
+    </table></div></div>
+  </div></div>
+
+  <!-- =================== PAGE 3: LICENSES =================== -->
+  <div id="page-licenses" class="tab-page"><div class="page-content">
+    <div class="report-bar">
+      <div class="title">🔑 Licenses</div>
+      <div class="filters">
+        <div class="filter-group"><span class="filter-label">View</span><select class="filter-select" title="View" onchange="switchPage(this.value)"><option value="overview">📈 Overview</option><option value="azure">☁️ Azure</option><option value="licenses" selected>🔑 Licenses</option></select></div>
+        <div class="filter-group"><span class="filter-label">Type</span><select class="filter-select" title="Type"><option>All</option><option>Paid</option><option>Free</option></select></div>
+        <div class="filter-group"><span class="filter-label">Status</span><select class="filter-select" title="Status"><option>All</option><option>Enabled</option><option>Suspended</option></select></div>
+      </div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi-pill"><div class="val">$119</div><div class="lbl">Monthly</div></div>
+      <div class="kpi-pill"><div class="val">3</div><div class="lbl">Paid SKUs</div></div>
+      <div class="kpi-pill"><div class="val">6</div><div class="lbl">Paid Seats</div></div>
+      <div class="kpi-pill"><div class="val">22</div><div class="lbl">Total SKUs</div></div>
+      <div class="kpi-pill"><div class="val">⚠ 1</div><div class="lbl">Over-Prov</div></div>
+      <div class="kpi-pill"><div class="val">19</div><div class="lbl">Free SKUs</div></div>
+    </div>
+    <div class="charts-main" style="grid-template-columns: repeat(3, 1fr)">
+      <div class="chart-panel"><div class="chart-panel-title">Cost per SKU</div><canvas id="c3-bar" class="chart-canvas"></canvas></div>
+      <div class="chart-panel"><div class="chart-panel-title">Cost Share</div><canvas id="c3-donut" class="chart-canvas"></canvas></div>
+      <div class="chart-panel"><div class="chart-panel-title">Paid License Cards</div><div class="lic-mini" id="lic-cards"></div></div>
+    </div>
+    <div class="tbl-section"><div class="table-wrap"><table>
+      <thead><tr><th>SKU</th><th>Name</th><th>Status</th><th class="num">Used</th><th class="num">Total</th><th class="num">%</th><th class="num">$/user</th><th class="num">Monthly</th><th>Paid</th></tr></thead>
+      <tbody id="sku-tbody"></tbody>
+    </table></div></div>
+  </div></div>
+
+  <div class="bi-footer">📊 Power BI Draft — Wecare Tech Billing · Azure Cost API · MS Graph · Google Billing</div>
+
+<script>
+// PAGE SWITCH
+function switchPage(name) {
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('select[onchange="switchPage(this.value)"]').forEach(s => s.value = name);
+}
+function setTheme(btn, mode) {
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (mode === 'light') document.body.classList.add('light');
+  else document.body.classList.remove('light');
+}
+
+// DATA
+const M = [{m:'T01',az:433.10,gg:0,ms:119},{m:'T02',az:1055.25,gg:0,ms:119},{m:'T03',az:975.88,gg:471.26,ms:119}];
+const SVC = {'Microsoft Fabric':[104.36,755.52,732.26],'Virtual Machines':[268.53,242.46,198.88],'Storage':[30.39,30.34,22.57],'Virtual Network':[29.76,26.88,22.06],'Foundry Models':[0.05,0.04,0.10]};
+const RES = [{n:'wecaredb',t:'Fabric',c:732.26},{n:'ecommerce',t:'VM',c:105.77},{n:'wecare-ai-dev',t:'VM',c:52.89},{n:'hr-vm',t:'VM',c:40.22},{n:'hr-vm_osdisk',t:'Disk',c:14.62},{n:'ai-dev_osdisk',t:'Disk',c:3.92},{n:'ecom_osdisk',t:'Disk',c:3.92}];
+const LIC = [
+  {s:'POWERAPPS_PER_USER',n:'Power Apps per user',st:'Enabled',u:3,t:3,pct:100,p:20,mo:60,paid:1},
+  {s:'O365_BUSINESS_PREMIUM',n:'M365 Business Premium',st:'Enabled',u:2,t:1,pct:200,p:22,mo:44,paid:1},
+  {s:'FLOW_PER_USER',n:'Power Automate per user',st:'Enabled',u:1,t:1,pct:100,p:15,mo:15,paid:1},
+  {s:'PBI_PREMIUM_PER_USER',n:'Power BI Premium',st:'Enabled',u:4,t:4,pct:100,p:0,mo:0,paid:0},
+  {s:'POWERAPPS_VIRAL',n:'Power Apps Viral',st:'Enabled',u:810,t:10000,pct:8,p:0,mo:0,paid:0},
+  {s:'POWER_BI_STANDARD',n:'Power BI Free',st:'Enabled',u:723,t:1000000,pct:0,p:0,mo:0,paid:0},
+  {s:'FLOW_FREE',n:'Power Automate Free',st:'Enabled',u:55,t:10000,pct:1,p:0,mo:0,paid:0},
+  {s:'TEAMS_ESSENTIALS',n:'Teams Essentials',st:'Enabled',u:37,t:0,pct:0,p:0,mo:0,paid:0},
+  {s:'TEAMS_EXPLORATORY',n:'Teams Exploratory',st:'Enabled',u:35,t:35,pct:100,p:0,mo:0,paid:0},
+  {s:'COPILOT_STUDIO',n:'Copilot Studio Viral',st:'Enabled',u:10,t:10000,pct:0,p:0,mo:0,paid:0},
+  {s:'POWERAPPS_DEV',n:'Power Apps Dev',st:'Enabled',u:9,t:10000,pct:0,p:0,mo:0,paid:0},
+  {s:'VIRTUAL_AGENT',n:'Virtual Agent USL',st:'Suspended',u:6,t:0,pct:0,p:0,mo:0,paid:0}
+];
+
+const $ = s => document.getElementById(s);
+const usd = n => '$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+function cc() { const s=getComputedStyle(document.documentElement); return Array.from({length:8},(_,i)=>s.getPropertyValue('--chart-'+(i+1)).trim()); }
+
+function init() {
+  const c = cc(), cs = getComputedStyle(document.documentElement);
+  Chart.defaults.color = cs.getPropertyValue('--text-muted').trim();
+  Chart.defaults.borderColor = cs.getPropertyValue('--border').trim();
+  Chart.defaults.font.family = "'Inter',system-ui,sans-serif";
+  Chart.defaults.font.size = 10;
+  const O = {responsive:true,maintainAspectRatio:true};
+
+  // === P1 ===
+  new Chart($('c1-bar'),{type:'bar',data:{labels:M.map(x=>x.m),datasets:[
+    {label:'Azure',data:M.map(x=>x.az),backgroundColor:c[0],borderRadius:3,borderSkipped:false},
+    {label:'Google',data:M.map(x=>x.gg),backgroundColor:c[3],borderRadius:3,borderSkipped:false},
+    {label:'M365',data:M.map(x=>x.ms),backgroundColor:c[2],borderRadius:3,borderSkipped:false}
+  ]},options:{...O,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,pointStyle:'circle',padding:8,font:{size:9}}}},
+    scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true,ticks:{callback:v=>'$'+v}}}}});
+
+  new Chart($('c1-trend'),{type:'line',data:{labels:M.map(x=>x.m),datasets:[
+    {label:'Total',data:M.map(x=>x.az+x.gg+x.ms),borderColor:c[0],backgroundColor:c[0]+'22',fill:true,tension:.3,pointRadius:4},
+    {label:'Azure',data:M.map(x=>x.az),borderColor:'#f87171',borderDash:[4,4],tension:.3,pointRadius:3}
+  ]},options:{...O,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,pointStyle:'circle',padding:8,font:{size:9}}}},
+    scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{callback:v=>'$'+v}}}}});
+
+  new Chart($('c1-donut'),{type:'doughnut',data:{labels:['Azure','Google','M365'],
+    datasets:[{data:[976,471,119],backgroundColor:[c[0],c[3],c[2]],borderWidth:0}]},
+    options:{...O,cutout:'60%',plugins:{legend:{position:'bottom',labels:{usePointStyle:true,pointStyle:'circle',padding:8,font:{size:9}}}}}});
+
+  new Chart($('c1-hbar'),{type:'bar',data:{labels:['Azure','Google','M365'],
+    datasets:[{data:[976,471,119],backgroundColor:[c[0],c[3],c[2]],borderRadius:3,borderSkipped:false}]},
+    options:{...O,indexAxis:'y',plugins:{legend:{display:false}},
+      scales:{x:{beginAtZero:true,ticks:{callback:v=>'$'+v}},y:{grid:{display:false}}}}});
+
+  // === P2 ===
+  const sn = Object.keys(SVC);
+  new Chart($('c2-svc'),{type:'bar',data:{labels:['T01','T02','T03'],
+    datasets:sn.map((k,i)=>({label:k,data:SVC[k],backgroundColor:c[i],borderRadius:2,borderSkipped:false}))},
+    options:{...O,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,pointStyle:'circle',padding:6,font:{size:8}}}},
+      scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,beginAtZero:true,ticks:{callback:v=>'$'+v}}}}});
+
+  new Chart($('c2-donut'),{type:'doughnut',data:{labels:sn,
+    datasets:[{data:sn.map(k=>SVC[k][2]),backgroundColor:c.slice(0,sn.length),borderWidth:0}]},
+    options:{...O,cutout:'55%',plugins:{legend:{position:'bottom',labels:{usePointStyle:true,pointStyle:'circle',padding:6,font:{size:8}}}}}});
+
+  new Chart($('c2-trend'),{type:'line',data:{labels:['T01','T02','T03'],datasets:[
+    {label:'Azure Total',data:M.map(x=>x.az),borderColor:c[0],backgroundColor:c[0]+'22',fill:true,tension:.3,pointRadius:4},
+    {label:'Fabric',data:SVC['Microsoft Fabric'],borderColor:c[1],borderDash:[4,4],tension:.3,pointRadius:3}
+  ]},options:{...O,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,pointStyle:'circle',padding:6,font:{size:8}}}},
+    scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{callback:v=>'$'+v}}}}});
+
+  // Resource Bars
+  const mx=RES[0].c, tc={'Fabric':c[0],'VM':c[1],'Disk':c[3],'IP':c[5]};
+  $('res-bars').innerHTML = RES.map(r=>{
+    const pct=(r.c/mx*100).toFixed(0);
+    return `<div class="res-item"><div class="res-name">${r.n}</div><div class="res-bg"><div class="res-fill" style="width:${pct}%;background:${tc[r.t]||c[4]}">${pct>15?usd(r.c):''}</div></div><div class="res-val">${usd(r.c)}</div></div>`;
+  }).join('');
+
+  // === P3 ===
+  const paid = LIC.filter(l=>l.paid);
+  new Chart($('c3-bar'),{type:'bar',data:{labels:paid.map(l=>l.n),
+    datasets:[{data:paid.map(l=>l.mo),backgroundColor:[c[0],c[1],c[2]],borderRadius:4,borderSkipped:false}]},
+    options:{...O,indexAxis:'y',plugins:{legend:{display:false}},
+      scales:{x:{beginAtZero:true,ticks:{callback:v=>'$'+v}},y:{grid:{display:false}}}}});
+
+  new Chart($('c3-donut'),{type:'doughnut',data:{labels:paid.map(l=>l.n),
+    datasets:[{data:paid.map(l=>l.mo),backgroundColor:[c[0],c[1],c[2]],borderWidth:0}]},
+    options:{...O,cutout:'55%',plugins:{legend:{position:'bottom',labels:{usePointStyle:true,pointStyle:'circle',padding:8,font:{size:9}}}}}});
+
+  // License Cards
+  $('lic-cards').innerHTML = paid.map(l=>{
+    const col=l.pct>100?'var(--status-error)':l.pct===100?'var(--status-warn)':'var(--status-ok)';
+    return `<div class="lic-m-card"><div class="lic-m-name">${l.n} ${l.pct>100?'⚠':''}</div><div class="lic-m-detail">${l.u}/${l.t} · $${l.p}/user</div><div class="lic-m-cost">${usd(l.mo)}/mo</div><div class="lic-m-bar"><div class="lic-m-fill" style="width:${Math.min(l.pct,100)}%;background:${col}"></div></div></div>`;
+  }).join('');
+
+  // SKU Table
+  $('sku-tbody').innerHTML = LIC.map(l=>{
+    const st=l.st==='Enabled'?'<span class="pill-ok">On</span>':'<span class="pill-diff">Off</span>';
+    const pd=l.paid?'<span class="tag tag-bkcp">Paid</span>':'<span style="color:var(--text-dim)">Free</span>';
+    return `<tr><td class="tname" style="font-size:8px">${l.s}</td><td>${l.n}</td><td>${st}</td><td class="num">${l.u}</td><td class="num">${l.t}</td><td class="num">${l.pct}%</td><td class="num">${l.p>0?'$'+l.p:'—'}</td><td class="num">${l.mo>0?usd(l.mo):'—'}</td><td>${pd}</td></tr>`;
+  }).join('');
+}
+init();
+</script>
+</body>
+</html>
