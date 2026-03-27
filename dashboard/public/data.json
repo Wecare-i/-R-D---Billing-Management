@@ -1,0 +1,40 @@
+{
+  "monthly": [
+    { "m": "T01", "az": 433.1, "gg": 0, "ms": 104.75 },
+    { "m": "T02", "az": 1055.25, "gg": 0, "ms": 119 },
+    { "m": "T03", "az": 1106.68, "gg": 471.26, "ms": 140.55 }
+  ],
+  "daily": [22.37, 25.14, 28.91, 35.02, 40.18, 42.55, 38.72, 36.44, 41.20, 45.68, 39.80, 42.11, 38.55, 36.90, 40.21, 35.77, 38.44, 41.92, 44.55, 39.18, 35.22, 38.10, 42.77, 40.55, 37.88, 39.44, 35.20],
+  "resources": [
+    { "n": "fabricdlake", "t": "capacities", "c": 825.45 },
+    { "n": "wecare-ai-vm", "t": "virtualMachines", "c": 226.30 },
+    { "n": "storageprod", "t": "storageAccounts", "c": 25.66 },
+    { "n": "sql-wecare-core", "t": "sqlDatabases", "c": 12.44 },
+    { "n": "aks-cluster-dev", "t": "managedClusters", "c": 8.22 },
+    { "n": "appgw-prod", "t": "applicationGateways", "c": 5.11 },
+    { "n": "redis-cache", "t": "redis", "c": 3.50 },
+    { "n": "func-billing", "t": "sites", "c": 0.00 },
+    { "n": "keyvault-prod", "t": "vaults", "c": 0.00 },
+    { "n": "apim-wecare", "t": "apiManagement", "c": 0.00 }
+  ],
+  "services": [
+    { "name": "Microsoft Fabric", "t01": 280, "t02": 680, "t03": 825.45 },
+    { "name": "Virtual Machines", "t01": 120, "t02": 230, "t03": 226.30 },
+    { "name": "Storage", "t01": 15, "t02": 22, "t03": 25.66 },
+    { "name": "Azure SQL", "t01": 10, "t02": 12, "t03": 12.44 },
+    { "name": "Azure Kubernetes", "t01": 5, "t02": 8, "t03": 8.22 },
+    { "name": "Application Gateway", "t01": 3, "t02": 5, "t03": 5.11 }
+  ],
+  "forecast": 1324,
+  "google": { "workspace": 420, "aiStudio": 48, "total": 471.26 },
+  "m365": {
+    "total": 140.55,
+    "items": [
+      { "name": "Power Apps per app plan", "cost": 60, "color": "#118DFF" },
+      { "name": "M365 Business Premium", "cost": 44, "color": "#12239E" },
+      { "name": "Power BI Pro", "cost": 20, "color": "#E66C37" },
+      { "name": "Power Automate per user", "cost": 16.55, "color": "#6B007B" }
+    ]
+  },
+  "buildTime": "27/03/2026 16:23 ICT"
+}

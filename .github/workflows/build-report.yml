@@ -1,13 +1,15 @@
-# Build & Deploy Billing Report to GitHub Pages
+# Build & Deploy Billing Dashboard (React) to GitHub Pages
 # Schedule: mỗi ngày 7h sáng (ICT = UTC+7 → 0:00 UTC)
 # Manual: workflow_dispatch
 
-name: Build & Deploy Report
+name: Build & Deploy Dashboard
 
 on:
   schedule:
     - cron: '0 0 * * *'  # Daily 00:00 UTC = 07:00 ICT
   workflow_dispatch:      # Manual trigger
+  push:
+    branches: [main]
 
 permissions:
   contents: read
@@ -33,12 +35,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install root dependencies
         run: npm ci
 
-      - name: Fetch Azure data & build report
+      - name: Fetch Azure data → data.json
         run: npm run build
         env:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -47,6 +48,16 @@ jobs:
           AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           AZURE_BILLING_ACCOUNT_1_ID: ${{ secrets.AZURE_BILLING_ACCOUNT_1_ID }}
           AZURE_BILLING_PROFILE_1_ID: ${{ secrets.AZURE_BILLING_PROFILE_1_ID }}
+          AZURE_BILLING_ACCOUNT_2_ID: ${{ secrets.AZURE_BILLING_ACCOUNT_2_ID }}
+          AZURE_BILLING_PROFILE_2_ID: ${{ secrets.AZURE_BILLING_PROFILE_2_ID }}
+
+      - name: Install dashboard dependencies
+        run: npm ci
+        working-directory: ./dashboard
+
+      - name: Build React dashboard
+        run: npm run build
+        working-directory: ./dashboard
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -54,7 +65,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './output'
+          path: './dashboard/dist'
 
       - name: Deploy to GitHub Pages
         id: deployment

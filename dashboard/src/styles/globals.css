@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #0F1E37;
+  --color-surface-container: rgba(19, 40, 68, 0.6);
+  --color-surface-container-low: #0c2035;
+  --color-surface-container-high: #1a2d4a;
+  --color-surface-container-lowest: #071428;
+  --color-surface-container-highest: #1e3350;
+  --color-surface-variant: #1e3350;
+  --color-primary: #118DFF;
+  --color-primary-container: #0d6bbf;
+  --color-secondary: #12239E;
+  --color-tertiary: #E66C37;
+  --color-accent-purple: #6B007B;
+  --color-on-surface: #e0e8f0;
+  --color-on-surface-variant: #308299;
+  --color-outline: #308299;
+  --color-outline-variant: #1e3350;
+  --font-family-sans: 'Inter', system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-on-surface);
+  font-family: var(--font-family-sans);
+}
+
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+.glass-card {
+  background: var(--color-surface-container);
+  backdrop-filter: blur(12px);
+}

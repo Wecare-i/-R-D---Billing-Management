@@ -299,6 +299,15 @@ async function main() {
     m365: { total: m365.total, items: m365.items }
   };
 
+  // 3b. Write data.json for React dashboard
+  const dataJsonPath = path.join(__dirname, '..', 'dashboard', 'public', 'data.json');
+  const now = new Date();
+  const ts = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} ICT`;
+  if (fs.existsSync(path.dirname(dataJsonPath))) {
+    fs.writeFileSync(dataJsonPath, JSON.stringify({ ...DATA, buildTime: ts }, null, 2), 'utf-8');
+    console.log(`   ✅ React data: ${dataJsonPath}`);
+  }
+
   console.log('\n📊 Data Summary:');
   monthly.forEach(m => console.log(`   ${m.m}: Azure $${m.az} | Google $${m.gg} | M365 $${m.ms}`));
 
@@ -312,8 +321,6 @@ async function main() {
   html = html.replace(fallbackRegex, newFallback);
 
   // Update build timestamp in subtitle
-  const now = new Date();
-  const ts = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} ICT`;
   const currentMonth = `T${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
   html = html.replace(
     /Real-time infrastructure expenditure — Azure Cost API · T\d{2}\/\d{4}/,
