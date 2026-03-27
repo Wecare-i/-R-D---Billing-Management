@@ -1,0 +1,13 @@
+{
+  "name": "billing-management",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Wecare Billing Report — Azure Cost API fetcher",
+  "scripts": {
+    "build": "node scripts/fetch-and-build.js"
+  },
+  "dependencies": {
+    "@azure/identity": "^4.6.0",
+    "dotenv": "^16.4.7"
+  }
+}

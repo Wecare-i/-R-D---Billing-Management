@@ -1,0 +1,61 @@
+# Build & Deploy Billing Report to GitHub Pages
+# Schedule: mỗi ngày 7h sáng (ICT = UTC+7 → 0:00 UTC)
+# Manual: workflow_dispatch
+
+name: Build & Deploy Report
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Daily 00:00 UTC = 07:00 ICT
+  workflow_dispatch:      # Manual trigger
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch Azure data & build report
+        run: npm run build
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_SP_CLIENT_ID: ${{ secrets.AZURE_SP_CLIENT_ID }}
+          AZURE_SP_CLIENT_SECRET: ${{ secrets.AZURE_SP_CLIENT_SECRET }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          AZURE_BILLING_ACCOUNT_1_ID: ${{ secrets.AZURE_BILLING_ACCOUNT_1_ID }}
+          AZURE_BILLING_PROFILE_1_ID: ${{ secrets.AZURE_BILLING_PROFILE_1_ID }}
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './output'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

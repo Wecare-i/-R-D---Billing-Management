@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
+
 <script id="tailwind-config">
   tailwind.config = {
     darkMode: "class",
@@ -184,392 +184,190 @@
 // API CONFIGURATION — from PROJECT.md
 // ========================================================
 const API_CONFIG = {
-  // Billing Account 2: Công ty cổ phần Wecare Group — Azure consumption
-  azure: {
-    subscriptionId: 'b230aef2-52a0-4800-8a8d-91a6880c86a2',
-    billingAccountId: '0e0c45d9-ca8d-5a88-3a11-2e028a0d4f39:0dd97e735-6a3b-4be8-b02a-72f02dbad05b_2019-05-31',
-    billingProfileId: 'FEN6-Y2IZ-BG7-PGB',
-    apiVersion: '2023-11-01',
-    baseUrl: 'https://management.azure.com',
-    scope: 'https://management.azure.com/.default'
-  },
-  // Billing Account 1: Wecare Group Joint Stock Company — MACC (M365 licenses)
-  m365: {
-    billingAccountId: '0e0c45d9-ca8d-5a38-3a11-2e028a0d4f39:4dd47361-7ed3-47bb-b66a-a868713759b6_2019-05-31',
-    billingProfileId: 'K7JM-MPGE-BG7-PGB'
-  },
-  google: {
-    billingAccountId: '01E5FF-07AFF5-FD37C5'
-  },
-  msal: {
-    clientId: '68e90e4b-610c-4657-9d59-4d789853103f', // Admin_WECARE Service Principal
-    authority: 'https://login.microsoftonline.com/organizations',
-    redirectUri: window.location.href.split('?')[0].split('#')[0]
-  }
+  azure: { subscriptionId: 'b230aef2-52a0-4800-8a8d-91a6880c86a2' },
+  google: { billingAccountId: '01E5FF-07AFF5-FD37C5' }
 };
 
 // ========================================================
 // FALLBACK DATA — used when API is unavailable
 // ========================================================
 const FALLBACK = {
-  monthly: [
-    { m: 'T01', az: 433.10, gg: 0, ms: 119 },
-    { m: 'T02', az: 1055.25, gg: 0, ms: 119 },
-    { m: 'T03', az: 1090.73, gg: 471.26, ms: 119 }
+  "monthly": [
+    {
+      "m": "T01",
+      "az": 433.1,
+      "gg": 0,
+      "ms": 0
+    },
+    {
+      "m": "T02",
+      "az": 1055.25,
+      "gg": 0,
+      "ms": 0
+    },
+    {
+      "m": "T03",
+      "az": 1102.66,
+      "gg": 471.26,
+      "ms": 0
+    }
   ],
-  daily: [
-    36.62,38.13,37.95,36.12,35.80,35.91,35.85,36.73,38.68,43.17,
-    50.06,43.70,45.53,38.50,36.30,48.12,55.31,47.92,44.99,45.31,
-    53.83,54.42,37.31,52.89,33.53,28.05
+  "daily": [
+    36.62,
+    38.13,
+    37.95,
+    36.12,
+    35.8,
+    35.91,
+    35.85,
+    36.73,
+    38.68,
+    43.17,
+    50.06,
+    43.7,
+    45.53,
+    38.5,
+    36.3,
+    48.12,
+    55.31,
+    47.92,
+    44.99,
+    45.31,
+    53.83,
+    54.42,
+    37.31,
+    52.89,
+    33.53,
+    33.26,
+    6.7
   ],
-  resources: [
-    { n: 'wecaredb', t: 'Fabric', c: 816.64 },
-    { n: 'ecommerce', t: 'VM', c: 119.02 },
-    { n: 'wecare-ai-dev', t: 'VM', c: 59.51 },
-    { n: 'hr-vm', t: 'VM', c: 45.26 },
-    { n: 'hr-vm_osdisk', t: 'Disk', c: 16.45 },
-    { n: 'ai-dev_osdisk', t: 'Disk', c: 4.41 },
-    { n: 'ecom_osdisk', t: 'Disk', c: 4.41 }
+  "resources": [
+    {
+      "n": "wecaredb",
+      "t": "capacities",
+      "c": 825.45
+    },
+    {
+      "n": "ecommerce",
+      "t": "virtualmachines",
+      "c": 120.36
+    },
+    {
+      "n": "wecare-ai-dev",
+      "t": "virtualmachines",
+      "c": 60.19
+    },
+    {
+      "n": "hr-vm",
+      "t": "virtualmachines",
+      "c": 45.77
+    },
+    {
+      "n": "hr-vm_osdisk_1_3b10a6c442464e5495a220cfacdcf928",
+      "t": "disks",
+      "c": 16.64
+    },
+    {
+      "n": "wecare-ai-dev_osdisk_1_0f2d926e95254c998573b3c8939c0f99",
+      "t": "disks",
+      "c": 4.46
+    },
+    {
+      "n": "ecommerce_osdisk_1_24e7b3d407444c02a7b8a24f11e46c88",
+      "t": "disks",
+      "c": 4.46
+    },
+    {
+      "n": "dev.ecommerce-ip",
+      "t": "publicipaddresses",
+      "c": 3.15
+    },
+    {
+      "n": "myvm-vnet-ip",
+      "t": "publicipaddresses",
+      "c": 3.15
+    },
+    {
+      "n": "hr-vm-ip",
+      "t": "publicipaddresses",
+      "c": 3.14
+    }
   ],
-  services: [
-    { name: 'Microsoft Fabric', t01: 104, t02: 756, t03: 817 },
-    { name: 'Virtual Machines', t01: 269, t02: 242, t03: 224 },
-    { name: 'Storage', t01: 30, t02: 30, t03: 26 },
-    { name: 'Virtual Network', t01: 30, t02: 27, t03: 24 },
-    { name: 'Foundry Models', t01: 0.05, t02: 0.04, t03: 0.10 }
+  "services": [
+    {
+      "name": "Microsoft Fabric",
+      "t01": 104.36,
+      "t02": 755.52,
+      "t03": 825.45,
+      "total": 1685.33
+    },
+    {
+      "name": "Virtual Machines",
+      "t01": 268.53,
+      "t02": 242.46,
+      "t03": 226.3,
+      "total": 737.29
+    },
+    {
+      "name": "Storage",
+      "t01": 30.39,
+      "t02": 30.34,
+      "t03": 25.66,
+      "total": 86.39
+    },
+    {
+      "name": "Virtual Network",
+      "t01": 29.76,
+      "t02": 26.88,
+      "t03": 25.13,
+      "total": 81.77
+    },
+    {
+      "name": "Foundry Models",
+      "t01": 0.05,
+      "t02": 0.04,
+      "t03": 0.1,
+      "total": 0.19
+    },
+    {
+      "name": "Bandwidth",
+      "t01": 0.01,
+      "t02": 0.01,
+      "t03": 0.01,
+      "total": 0.03
+    },
+    {
+      "name": "Log Analytics",
+      "t01": 0,
+      "total": 0
+    }
   ],
-  google: { workspace: 420, aiStudio: 48, total: 471.26 },
-  m365: { total: 119, items: [
-    { name: 'Power Apps ×3', cost: 60, color: '#118DFF' },
-    { name: 'M365 Business Premium ×2', cost: 44, color: '#12239E' },
-    { name: 'Power Automate ×1', cost: 15, color: '#E66C37' }
-  ]}
+  "forecast": 1323.78,
+  "google": {
+    "workspace": 420,
+    "aiStudio": 48,
+    "total": 471.26
+  },
+  "m365": {
+    "total": 0,
+    "items": []
+  }
 };
 
 // ========================================================
 // STATE
 // ========================================================
 let DATA = { ...FALLBACK };
-let dataSource = 'cached'; // 'live' | 'cached'
-let msalInstance = null;
+let dataSource = 'live'; // Data is baked by Node.js script
 let chartInstances = {};
 
 // ========================================================
-// MSAL AUTHENTICATION
+// DATA LOADED BY NODE.JS SCRIPT (npm run build)
+// No browser auth needed — data is baked at build time
 // ========================================================
-async function initMSAL() {
-  try {
-    msalInstance = new msal.PublicClientApplication({
-      auth: {
-        clientId: API_CONFIG.msal.clientId,
-        authority: API_CONFIG.msal.authority,
-        redirectUri: API_CONFIG.msal.redirectUri
-      },
-      cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true }
-    });
-    await msalInstance.initialize();
-
-    // Handle redirect response (user coming back from Azure login)
-    const response = await msalInstance.handleRedirectPromise();
-    if (response) {
-      console.log('✅ Redirect login successful');
-      return response.accessToken;
-    }
-
-    // Try silent token acquisition (cached token)
-    const accounts = msalInstance.getAllAccounts();
-    if (accounts.length > 0) {
-      try {
-        const tokenResponse = await msalInstance.acquireTokenSilent({
-          scopes: [API_CONFIG.azure.scope],
-          account: accounts[0]
-        });
-        console.log('✅ Silent token acquired');
-        return tokenResponse.accessToken;
-      } catch (silentErr) {
-        console.warn('⚠️ Silent token failed, redirecting to login...');
-        // Silent failed → redirect to login
-        await msalInstance.acquireTokenRedirect({ scopes: [API_CONFIG.azure.scope] });
-        return null; // Page will redirect, won't reach here
-      }
-    }
-
-    // No account found → redirect to Azure login
-    console.log('🔑 No account found, redirecting to Azure login...');
-    await msalInstance.acquireTokenRedirect({ scopes: [API_CONFIG.azure.scope] });
-    return null; // Page will redirect
-  } catch (err) {
-    console.warn('⚠️ MSAL auth failed:', err.message);
-    return null;
-  }
-}
-
-// ========================================================
-// AZURE COST MANAGEMENT API
-// ========================================================
-async function azureFetch(endpoint, body, token) {
-  const url = `${API_CONFIG.azure.baseUrl}/subscriptions/${API_CONFIG.azure.subscriptionId}/providers/Microsoft.CostManagement/${endpoint}?api-version=${API_CONFIG.azure.apiVersion}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  });
-  if (!res.ok) throw new Error(`Azure API ${res.status}: ${res.statusText}`);
-  return res.json();
-}
-
-// Monthly cost by service
-async function fetchMonthlyCostByService(token) {
-  const now = new Date();
-  const year = now.getFullYear();
-  const data = await azureFetch('query', {
-    type: 'ActualCost',
-    timeframe: 'Custom',
-    timePeriod: { from: `${year}-01-01`, to: `${year}-12-31` },
-    dataset: {
-      granularity: 'Monthly',
-      aggregation: { totalCost: { name: 'CostUSD', function: 'Sum' } },
-      grouping: [{ type: 'Dimension', name: 'ServiceName' }]
-    }
-  }, token);
-  return data.properties?.rows || [];
-}
-
-// Daily cost for current month
-async function fetchDailyCost(token) {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
-  const data = await azureFetch('query', {
-    type: 'ActualCost',
-    timeframe: 'Custom',
-    timePeriod: { from: `${y}-${m}-01`, to: `${y}-${m}-${lastDay}` },
-    dataset: {
-      granularity: 'Daily',
-      aggregation: { totalCost: { name: 'CostUSD', function: 'Sum' } }
-    }
-  }, token);
-  return data.properties?.rows || [];
-}
-
-// Top resources
-async function fetchTopResources(token) {
-  const data = await azureFetch('query', {
-    type: 'ActualCost',
-    timeframe: 'MonthToDate',
-    dataset: {
-      granularity: 'None',
-      aggregation: { totalCost: { name: 'CostUSD', function: 'Sum' } },
-      grouping: [
-        { type: 'Dimension', name: 'ResourceId' },
-        { type: 'Dimension', name: 'ResourceType' }
-      ],
-      sorting: [{ direction: 'descending', name: 'CostUSD' }]
-    }
-  }, token);
-  return data.properties?.rows || [];
-}
-
-// Forecast
-async function fetchForecast(token) {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
-  try {
-    const data = await azureFetch('forecast', {
-      type: 'ActualCost',
-      timeframe: 'Custom',
-      timePeriod: { from: `${y}-${m}-01`, to: `${y}-${m}-${lastDay}` },
-      dataset: {
-        granularity: 'Daily',
-        aggregation: { totalCost: { name: 'CostUSD', function: 'Sum' } }
-      },
-      includeActualCost: true,
-      includeFreshPartialCost: false
-    }, token);
-    const rows = data.properties?.rows || [];
-    return rows.reduce((sum, r) => sum + (r[0] || 0), 0);
-  } catch { return null; }
-}
-
-// ========================================================
-// M365 COSTS — via Billing Profile scope (MACC account)
-// ========================================================
-async function billingProfileFetch(endpoint, body, token) {
-  const scope = `providers/Microsoft.Billing/billingAccounts/${API_CONFIG.m365.billingAccountId}/billingProfiles/${API_CONFIG.m365.billingProfileId}`;
-  const url = `${API_CONFIG.azure.baseUrl}/${scope}/providers/Microsoft.CostManagement/${endpoint}?api-version=${API_CONFIG.azure.apiVersion}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  });
-  if (!res.ok) throw new Error(`M365 Billing API ${res.status}: ${res.statusText}`);
-  return res.json();
-}
-
-// M365 monthly cost by product
-async function fetchM365Costs(token) {
-  const now = new Date();
-  const year = now.getFullYear();
-  try {
-    const data = await billingProfileFetch('query', {
-      type: 'ActualCost',
-      timeframe: 'Custom',
-      timePeriod: { from: `${year}-01-01`, to: `${year}-12-31` },
-      dataset: {
-        granularity: 'Monthly',
-        aggregation: { totalCost: { name: 'CostUSD', function: 'Sum' } },
-        grouping: [{ type: 'Dimension', name: 'ProductOrderName' }]
-      }
-    }, token);
-    return data.properties?.rows || [];
-  } catch (err) {
-    console.warn('⚠️ M365 billing API error:', err.message);
-    return [];
-  }
-}
-
-// Google billing — hardcoded (no REST API, manual update from Console)
-
-// ========================================================
-// DATA PROCESSING
-// ========================================================
-function processAzureMonthly(rows) {
-  // rows: [cost, date, serviceName, currency]
-  const byMonth = {};
-  rows.forEach(r => {
-    const cost = r[0];
-    const date = new Date(r[1] * 1 || r[1]);
-    const monthKey = `T${String(date.getMonth() + 1).padStart(2, '0')}`;
-    if (!byMonth[monthKey]) byMonth[monthKey] = { total: 0, services: {} };
-    byMonth[monthKey].total += cost;
-    const svc = r[2] || 'Other';
-    byMonth[monthKey].services[svc] = (byMonth[monthKey].services[svc] || 0) + cost;
-  });
-  return byMonth;
-}
-
-function processAzureDaily(rows) {
-  // rows: [cost, date, currency]
-  return rows.map(r => ({
-    cost: r[0],
-    date: new Date(r[1] * 1 || r[1])
-  })).sort((a, b) => a.date - b.date);
-}
-
-function processResources(rows) {
-  // rows: [cost, resourceId, resourceType, currency]
-  return rows.slice(0, 10).map(r => {
-    const parts = (r[1] || '').split('/');
-    const name = parts[parts.length - 1] || 'unknown';
-    const typeParts = (r[2] || '').split('/');
-    const type = typeParts[typeParts.length - 1] || 'Other';
-    return { n: name, t: type, c: r[0] };
-  });
-}
-
-// ========================================================
-// MAIN DATA LOADER
-// ========================================================
-async function loadData() {
-  setStatus('loading', 'Connecting...');
-
-  // Try Azure API
-  const token = await initMSAL();
-  let azureLive = false;
-
-  if (token) {
-    try {
-      console.log('🔑 Azure token acquired, fetching data...');
-      const [monthlyRows, dailyRows, resourceRows, forecast, m365Rows] = await Promise.all([
-        fetchMonthlyCostByService(token),
-        fetchDailyCost(token),
-        fetchTopResources(token),
-        fetchForecast(token),
-        fetchM365Costs(token)
-      ]);
-
-      if (monthlyRows.length > 0) {
-        const byMonth = processAzureMonthly(monthlyRows);
-        // Update monthly data
-        DATA.monthly = Object.keys(byMonth).sort().map(m => ({
-          m, az: byMonth[m].total, gg: DATA.monthly.find(x => x.m === m)?.gg || 0, ms: 119
-        }));
-        // Update services data from latest month + Q1
-        const allServices = {};
-        Object.keys(byMonth).forEach(m => {
-          const monthNum = parseInt(m.replace('T', ''));
-          Object.entries(byMonth[m].services).forEach(([svc, cost]) => {
-            if (!allServices[svc]) allServices[svc] = { name: svc };
-            allServices[svc][`t${String(monthNum).padStart(2, '0')}`] = cost;
-          });
-        });
-        DATA.services = Object.values(allServices)
-          .map(s => ({ ...s, total: (s.t01 || 0) + (s.t02 || 0) + (s.t03 || 0) }))
-          .sort((a, b) => b.total - a.total)
-          .slice(0, 8);
-        azureLive = true;
-      }
-
-      if (dailyRows.length > 0) {
-        const daily = processAzureDaily(dailyRows);
-        DATA.daily = daily.map(d => d.cost);
-        azureLive = true;
-      }
-
-      if (resourceRows.length > 0) {
-        DATA.resources = processResources(resourceRows);
-        azureLive = true;
-      }
-
-      if (forecast !== null) {
-        DATA.forecast = forecast;
-      }
-
-      // Process M365 costs from billing profile
-      if (m365Rows.length > 0) {
-        const m365ByMonth = {};
-        const m365Products = {};
-        m365Rows.forEach(r => {
-          const cost = r[0];
-          const date = new Date(r[1] * 1 || r[1]);
-          const monthKey = `T${String(date.getMonth() + 1).padStart(2, '0')}`;
-          m365ByMonth[monthKey] = (m365ByMonth[monthKey] || 0) + cost;
-          const product = r[2] || 'Other';
-          m365Products[product] = (m365Products[product] || 0) + cost;
-        });
-        // Update monthly M365 costs
-        DATA.monthly.forEach(m => {
-          if (m365ByMonth[m.m] !== undefined) m.ms = m365ByMonth[m.m];
-        });
-        // Update M365 license breakdown
-        const colors = ['#118DFF', '#12239E', '#E66C37', '#6B007B'];
-        DATA.m365.items = Object.entries(m365Products)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5)
-          .map(([name, cost], i) => ({ name, cost: Math.round(cost * 100) / 100, color: colors[i % colors.length] }));
-        DATA.m365.total = Object.values(m365ByMonth).reduce((s, v) => Math.max(s, v), 0);
-        console.log('✅ M365 data loaded from billing profile');
-      }
-
-      console.log('✅ Azure data loaded successfully');
-    } catch (err) {
-      console.warn('⚠️ Azure API error:', err.message);
-    }
-  }
-
-  // Set final status
-  dataSource = azureLive ? 'live' : 'cached';
-  setStatus(dataSource, azureLive ? 'Live API' : 'Cached Data');
-
+function loadData() {
+  // Data is already in FALLBACK, injected by scripts/fetch-and-build.js
+  setStatus('live', 'Live Data');
   return DATA;
 }
 
@@ -880,32 +678,17 @@ function renderAll(data) {
   updateFooter();
 }
 
-async function refreshData() {
-  setStatus('loading', 'Refreshing...');
-  try {
-    await loadData();
-    renderAll(DATA);
-  } catch (err) {
-    console.error('Refresh error:', err);
-    setStatus('cached', 'Error — Cached');
-  }
+function refreshData() {
+  loadData();
+  renderAll(DATA);
 }
 
 // ========================================================
-// INIT
+// INIT — data already baked by Node.js script
 // ========================================================
-(async function init() {
-  // Render immediately with fallback data
+(function init() {
+  loadData();
   renderAll(DATA);
-
-  // Then try to load live data
-  try {
-    await loadData();
-    renderAll(DATA);
-  } catch (err) {
-    console.warn('Init error:', err);
-    setStatus('cached', 'Cached Data');
-  }
 })();
 </script>
 
