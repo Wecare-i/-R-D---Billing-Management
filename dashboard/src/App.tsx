@@ -55,28 +55,23 @@ function DashboardContent({ data }: { data: import('@/features/billing/types').B
 
   return (
     <div className="min-h-screen p-4 md:p-8 lg:p-10 w-[85%] mx-auto space-y-6">
-      {/* Header */}
-      <header className="flex flex-col md:flex-row md:items-end gap-4 md:gap-8">
+      {/* Header + Filter Bar — same row */}
+      <header className="flex flex-col md:flex-row md:items-center gap-4">
         <div className="flex-1">
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Cost Management Report</h1>
-          <p className="text-sm text-on-surface-variant mt-1">
-            Real-time infrastructure expenditure — Azure Cost API · {latest.m}/2026
-          </p>
+          <div className="flex items-center gap-2 text-xs font-medium text-on-surface-variant mt-2">
+            <span className="w-2 h-2 rounded-full bg-green-400 pulse-dot" />
+            <span>Last updated: {data.buildTime || 'N/A'}</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2 text-xs font-medium text-on-surface-variant">
-          <span className="w-2 h-2 rounded-full bg-green-400 pulse-dot" />
-          <span>Last updated: {data.buildTime || 'N/A'}</span>
-        </div>
+        <FilterBar
+          months={months}
+          selectedMonth={filters.selectedMonth}
+          vendor={filters.vendor}
+          onMonthChange={setMonth}
+          onVendorChange={setVendor}
+        />
       </header>
-
-      {/* Filter Bar */}
-      <FilterBar
-        months={months}
-        selectedMonth={filters.selectedMonth}
-        vendor={filters.vendor}
-        onMonthChange={setMonth}
-        onVendorChange={setVendor}
-      />
 
       {/* KPI Strip — reactive to selected month */}
       <KpiStrip data={data} selectedMonth={filters.selectedMonth} />
@@ -87,11 +82,10 @@ function DashboardContent({ data }: { data: import('@/features/billing/types').B
       {/* Charts — always show all for context, highlight selected */}
       <Charts data={data} selectedMonth={filters.selectedMonth} vendor={filters.vendor} />
 
-      {/* Resources — only Azure */}
-      {showAzure && <ResourceBars data={data} />}
+      {/* Resources — all vendors */}
+      <ResourceBars data={data} vendor={filters.vendor} selectedMonth={filters.selectedMonth} />
 
-      {/* Service Table — only Azure */}
-      {showAzure && <ServiceTable data={data} selectedMonth={filters.selectedMonth} />}
+
 
       {/* Footer */}
       <footer className="text-center text-[11px] text-on-surface-variant py-6 border-t border-outline-variant/10">

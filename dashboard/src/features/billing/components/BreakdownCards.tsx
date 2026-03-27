@@ -23,7 +23,7 @@ export function BreakdownCards({ data, selectedMonth, showAzure, showGoogle, sho
     <section className={`grid grid-cols-1 ${gridClass} gap-6`}>
       {/* Azure */}
       {showAzure && (
-        <div className="bg-surface-container/60 backdrop-blur-xl rounded-xl p-6 flex flex-col gap-5 hover:bg-surface-container-high transition-all duration-300 group">
+        <div className="card p-6 flex flex-col gap-5 group hover:border-primary/20 transition-all duration-300">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -55,7 +55,7 @@ export function BreakdownCards({ data, selectedMonth, showAzure, showGoogle, sho
 
       {/* Google */}
       {showGoogle && (
-        <div className="bg-surface-container/60 backdrop-blur-xl rounded-xl p-6 flex flex-col gap-5 hover:bg-surface-container-high transition-all duration-300 group">
+      <div className="card p-6 flex flex-col gap-5 group hover:border-primary/20 transition-all duration-300">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center group-hover:bg-tertiary/20 transition-colors">
@@ -65,22 +65,31 @@ export function BreakdownCards({ data, selectedMonth, showAzure, showGoogle, sho
             </div>
             <span className="text-sm font-bold text-tertiary tabular-nums">{usd(current.gg)}</span>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-surface-container-low p-4 rounded-lg flex flex-col gap-1 hover:bg-surface-container transition-colors">
-              <span className="text-[10px] font-bold text-on-surface-variant uppercase">Workspace</span>
-              <span className="text-xl font-bold tabular-nums">{usdShort(data.google.workspace)}</span>
-            </div>
-            <div className="bg-surface-container-low p-4 rounded-lg flex flex-col gap-1 hover:bg-surface-container transition-colors">
-              <span className="text-[10px] font-bold text-on-surface-variant uppercase">AI Studio</span>
-              <span className="text-xl font-bold tabular-nums">{usdShort(data.google.aiStudio)}</span>
-            </div>
+          <div className="space-y-3">
+            {[
+              { name: 'Workspace', cost: data.google.workspace },
+              { name: 'AI Studio', cost: data.google.aiStudio },
+            ].map((item) => {
+              const pct = current.gg > 0 ? Math.round((item.cost / current.gg) * 100) : 0;
+              return (
+                <div key={item.name}>
+                  <div className="flex justify-between items-end">
+                    <span className="text-xs text-on-surface-variant font-medium">{item.name}</span>
+                    <span className="text-sm font-bold tabular-nums">{usd(item.cost)}</span>
+                  </div>
+                  <div className="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden mt-1">
+                    <div className="bg-tertiary h-full transition-all duration-700" style={{ width: `${pct}%`, opacity: Math.max(0.3, pct / 100) }} />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
 
       {/* M365 */}
       {showM365 && (
-        <div className="bg-surface-container/60 backdrop-blur-xl rounded-xl p-6 flex flex-col gap-5 hover:bg-surface-container-high transition-all duration-300 group">
+      <div className="card p-6 flex flex-col gap-5 group hover:border-primary/20 transition-all duration-300">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-accent-purple/10 flex items-center justify-center group-hover:bg-accent-purple/20 transition-colors">
@@ -90,16 +99,21 @@ export function BreakdownCards({ data, selectedMonth, showAzure, showGoogle, sho
             </div>
             <span className="text-sm font-bold text-purple-400 tabular-nums">{usd(current.ms)}</span>
           </div>
-          <div className="space-y-2">
-            {data.m365.items.map((item) => (
-              <div key={item.name} className="flex items-center justify-between p-3 bg-surface-container-low rounded-lg hover:bg-surface-container transition-colors">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full" style={{ background: item.color }} />
-                  <span className="text-xs font-medium">{item.name}</span>
+          <div className="space-y-3">
+            {[...data.m365.items].sort((a, b) => b.cost - a.cost).slice(0, 3).map((item) => {
+              const pct = current.ms > 0 ? Math.round((item.cost / current.ms) * 100) : 0;
+              return (
+                <div key={item.name}>
+                  <div className="flex justify-between items-end">
+                    <span className="text-xs text-on-surface-variant font-medium">{item.name}</span>
+                    <span className="text-sm font-bold tabular-nums">${item.cost}</span>
+                  </div>
+                  <div className="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden mt-1">
+                    <div className="bg-purple-400 h-full transition-all duration-700" style={{ width: `${pct}%`, opacity: Math.max(0.3, pct / 100) }} />
+                  </div>
                 </div>
-                <span className="text-xs font-bold tabular-nums">${item.cost}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

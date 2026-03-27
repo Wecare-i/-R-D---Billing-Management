@@ -16,22 +16,22 @@ export function KpiStrip({ data, selectedMonth }: Props) {
   const momPct = totalPrev > 0 ? ((totalNow - totalPrev) / totalPrev) * 100 : 0;
 
   const kpis = [
-    { label: `Total ${current.m}`, value: usdShort(totalNow), accent: 'border-primary/30 text-primary', highlight: true },
-    { label: 'Azure', value: usdShort(current.az), accent: 'border-outline-variant/20' },
-    { label: 'Google', value: usdShort(current.gg), accent: 'border-outline-variant/20' },
-    { label: 'M365', value: usdShort(current.ms), accent: 'border-outline-variant/20' },
+    { label: `Total ${current.m}`, value: usdShort(totalNow), accent: 'border-primary/50 text-primary', highlight: true },
+    { label: 'Azure', value: usdShort(current.az), accent: 'border-outline/40' },
+    { label: 'Google', value: usdShort(current.gg), accent: 'border-outline/40' },
+    { label: 'M365', value: usdShort(current.ms), accent: 'border-outline/40' },
   ];
 
   return (
     <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
       {kpis.map((k) => (
-        <div key={k.label} className={`bg-surface-container-low border ${k.accent} rounded-full px-5 py-3 flex flex-col items-center justify-center text-center transition-all duration-300 hover:scale-[1.02]`}>
+        <div key={k.label} className={`bg-surface-container-low border ${k.accent} rounded-full px-5 py-3 flex flex-col items-center justify-center text-center transition-all duration-200 hover:-translate-y-1 hover:bg-surface-container-high hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] cursor-default`}>
           <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">{k.label}</span>
           <span className={`text-xl font-bold tabular-nums ${k.highlight ? 'text-primary' : ''}`}>{k.value}</span>
         </div>
       ))}
       {prev && (
-        <div className="bg-surface-container-low border border-tertiary/20 rounded-full px-5 py-3 flex flex-col items-center justify-center text-center">
+        <div className="bg-surface-container-low border border-tertiary/40 rounded-full px-5 py-3 flex flex-col items-center justify-center text-center transition-all duration-200 hover:-translate-y-1 hover:bg-surface-container-high hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] cursor-default">
           <span className="text-[10px] uppercase tracking-widest font-bold text-tertiary">vs {prev.m}</span>
           <div className="flex items-center gap-1">
             {momPct >= 0 ? <TrendingUp className="w-4 h-4 text-tertiary" /> : <TrendingDown className="w-4 h-4 text-green-400" />}
@@ -41,7 +41,7 @@ export function KpiStrip({ data, selectedMonth }: Props) {
           </div>
         </div>
       )}
-      <div className="bg-surface-container-low border border-accent-purple/30 rounded-full px-5 py-3 flex flex-col items-center justify-center text-center">
+      <div className="bg-surface-container-low border border-accent-purple/50 rounded-full px-5 py-3 flex flex-col items-center justify-center text-center transition-all duration-200 hover:-translate-y-1 hover:bg-surface-container-high hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] cursor-default">
         <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Forecast</span>
         <span className="text-xl font-bold tabular-nums text-purple-400">~{usdShort(data.forecast || 0)}</span>
       </div>

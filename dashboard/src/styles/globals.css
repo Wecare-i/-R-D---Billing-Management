@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-surface: #0F1E37;
-  --color-surface-container: rgba(19, 40, 68, 0.6);
-  --color-surface-container-low: #0c2035;
-  --color-surface-container-high: #1a2d4a;
-  --color-surface-container-lowest: #071428;
-  --color-surface-container-highest: #1e3350;
+  --color-surface: #060d1a;
+  --color-surface-container: #0d1b2e;
+  --color-surface-container-low: #0a1525;
+  --color-surface-container-high: #142640;
+  --color-surface-container-lowest: #040a14;
+  --color-surface-container-highest: #1a2d4a;
   --color-surface-variant: #1e3350;
   --color-primary: #118DFF;
   --color-primary-container: #0d6bbf;
@@ -14,9 +14,11 @@
   --color-tertiary: #E66C37;
   --color-accent-purple: #6B007B;
   --color-on-surface: #e0e8f0;
-  --color-on-surface-variant: #308299;
+  --color-on-surface-variant: #5a8da0;
   --color-outline: #308299;
   --color-outline-variant: #1e3350;
+  --color-card-border: rgba(48, 130, 153, 0.15);
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.4), 0 0 1px rgba(48, 130, 153, 0.1);
   --font-family-sans: 'Inter', system-ui, sans-serif;
 }
 
@@ -31,7 +33,17 @@ body {
 @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
 
-.glass-card {
+/* Card with outline + shadow */
+.card {
   background: var(--color-surface-container);
-  backdrop-filter: blur(12px);
+  border: 1px solid rgba(48, 130, 153, 0.35);
+  box-shadow: var(--shadow-card);
+  border-radius: 0.75rem;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s, background 0.2s;
+}
+.card:hover {
+  border-color: rgba(48, 130, 153, 0.5);
+  background: #122a45;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.5), 0 0 4px rgba(17, 141, 255, 0.15);
+  transform: translateY(-2px);
 }

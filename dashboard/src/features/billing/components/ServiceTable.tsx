@@ -15,7 +15,7 @@ export function ServiceTable({ data, selectedMonth }: Props) {
   const showAllMonths = selectedMonth === 'all';
 
   return (
-    <section className="bg-surface-container/60 backdrop-blur-xl rounded-xl overflow-hidden">
+    <section className="card overflow-hidden">
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-surface-container-low">

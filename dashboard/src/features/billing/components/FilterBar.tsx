@@ -18,11 +18,7 @@ const VENDORS: { key: VendorFilter; label: string; color: string }[] = [
 
 export function FilterBar({ months, selectedMonth, vendor, onMonthChange, onVendorChange }: FilterBarProps) {
   return (
-    <section className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-surface-container/40 backdrop-blur-xl rounded-xl border border-outline-variant/10">
-      <div className="flex items-center gap-2 text-on-surface-variant">
-        <Filter className="w-4 h-4" />
-        <span className="text-xs font-bold uppercase tracking-widest">Filters</span>
-      </div>
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
 
       {/* Month Selector */}
       <div className="relative">
@@ -55,6 +51,6 @@ export function FilterBar({ months, selectedMonth, vendor, onMonthChange, onVend
           </button>
         ))}
       </div>
-    </section>
+    </div>
   );
 }
