@@ -55,6 +55,20 @@
   - Tables loaded: Usage details, Budgets, Balance summary, Charges (bỏ RI tables)
   - DAX Measures — KPIs, trends, drill-down
 
+#### Azure Cost Management — Bảng dữ liệu trong Power BI
+
+| Bảng | Mô tả | Dùng |
+|---|---|---|
+| **All Usage** | Bảng tự tạo (Append `Usage details` + `Usage details (2)`), chứa tất cả data usage | ✅ **Dùng chính** |
+| **Balance summary** | Tóm tắt số dư tài khoản, tổng credits, tổng chi tiêu tháng hiện tại | ❌ |
+| **Billing events** | Lịch sử giao dịch: hóa đơn, thanh toán, charges | ⚠️ Tra cứu hóa đơn |
+| **Charges / Charges (2)** | Chi phí tổng hợp theo billing period (scope 1 & 2) | ❌ (đã merge) |
+| **Credit lots** | Credit Azure còn lại, hạn sử dụng | ❌ |
+| **Usage details / Usage details (2)** | Chi tiết từng dòng usage hàng ngày (scope 1: Azure, scope 2: M365) | ❌ (đã merge vào All Usage) |
+| **Usage details amortized / (2)** | Giống Usage details nhưng phân bổ đều chi phí Reserved Instances theo ngày | ⚠️ Dùng nếu có RI |
+
+> **Phân biệt data**: Dùng `billingProfileId` để tách Azure (`FEN6-Y2IZ-BG7-PGB`) vs M365 (`K7JM-MPGE-BG7-PGB`). Cột `consumedService` phân loại Azure services (Fabric, Compute, Storage...), cột `productOrderName` phân loại M365 licenses.
+
 #### API Connections — Lấy Data Tự Động
 
 | Vendor | API | Auth | Service Principal / SA | Status |
