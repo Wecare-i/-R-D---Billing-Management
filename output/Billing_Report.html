@@ -9,33 +9,35 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
 <script id="tailwind-config">
   tailwind.config = {
     darkMode: "class",
     theme: {
       extend: {
         colors: {
-          "surface-container-high": "#23293c",
-          "surface-variant": "#2e3447",
-          "surface-container": "#191f31",
-          "surface-container-highest": "#2e3447",
-          "surface-container-low": "#151b2d",
-          "surface-container-lowest": "#070d1f",
-          "surface-bright": "#33394c",
-          "surface": "#0c1324",
-          "background": "#0c1324",
-          "primary": "#7cd2ed",
-          "primary-container": "#409cb5",
-          "secondary": "#c0c1ff",
-          "secondary-container": "#3131c0",
-          "tertiary": "#45dfa4",
-          "tertiary-container": "#00a574",
+          "surface-container-high": "#1a2d4a",
+          "surface-variant": "#1e3350",
+          "surface-container": "#132844",
+          "surface-container-highest": "#1e3350",
+          "surface-container-low": "#0c2035",
+          "surface-container-lowest": "#071428",
+          "surface-bright": "#243a56",
+          "surface": "#0F1E37",
+          "background": "#0F1E37",
+          "primary": "#118DFF",
+          "primary-container": "#0d6bbf",
+          "secondary": "#12239E",
+          "secondary-container": "#0e1b7a",
+          "tertiary": "#E66C37",
+          "tertiary-container": "#b8522a",
           "error": "#ffb4ab",
-          "on-surface": "#dce1fb",
-          "on-surface-variant": "#bec8cc",
-          "on-primary-container": "#002e39",
-          "outline": "#889296",
-          "outline-variant": "#3e484c",
+          "accent-purple": "#6B007B",
+          "on-surface": "#e0e8f0",
+          "on-surface-variant": "#308299",
+          "on-primary-container": "#ffffff",
+          "outline": "#308299",
+          "outline-variant": "#1e3350",
         },
         fontFamily: {
           "headline": ["Inter"],
@@ -52,34 +54,37 @@
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   }
   .tabular-nums { font-variant-numeric: tabular-nums; }
-  body { background-color: #0c1324; color: #dce1fb; font-family: 'Inter', sans-serif; }
+  body { background-color: #0F1E37; color: #e0e8f0; font-family: 'Inter', sans-serif; }
   .glass-card {
-    background: rgba(25, 31, 49, 0.6);
+    background: rgba(19, 40, 68, 0.6);
     backdrop-filter: blur(12px);
   }
+  @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
 </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
 <!-- TopNavBar -->
-<nav class="flex justify-between items-center w-full px-6 py-3 sticky top-0 bg-[#0c1324] bg-opacity-90 backdrop-blur-md z-50">
+<nav class="flex justify-between items-center w-full px-6 py-3 sticky top-0 bg-[#0F1E37] bg-opacity-90 backdrop-blur-md z-50">
   <div class="flex items-center gap-8">
-    <span class="text-xl font-bold text-[#7cd2ed] tracking-tighter">Wecare</span>
-    <div class="hidden md:flex gap-6 items-center">
-      <a class="font-['Inter'] text-sm tracking-tight font-semibold text-[#7cd2ed] border-b-2 border-[#7cd2ed] pb-1" href="#">Cost Report</a>
-      <a class="font-['Inter'] text-sm tracking-tight font-medium text-[#bec8cc] hover:text-[#dce1fb] transition-colors duration-200" href="#">Azure Detail</a>
-      <a class="font-['Inter'] text-sm tracking-tight font-medium text-[#bec8cc] hover:text-[#dce1fb] transition-colors duration-200" href="#">Licenses</a>
-    </div>
+    <span class="text-xl font-bold text-[#118DFF] tracking-tighter">Wecare</span>
   </div>
-  <div class="flex items-center gap-4">
+  <div class="flex items-center gap-6">
+    <div class="hidden md:flex gap-6 items-center">
+      <a class="font-['Inter'] text-sm tracking-tight font-semibold text-[#118DFF] border-b-2 border-[#118DFF] pb-1" href="#">Cost Report</a>
+      <a class="font-['Inter'] text-sm tracking-tight font-medium text-[#308299] hover:text-[#e0e8f0] transition-colors duration-200" href="#">Azure Detail</a>
+      <a class="font-['Inter'] text-sm tracking-tight font-medium text-[#308299] hover:text-[#e0e8f0] transition-colors duration-200" href="#">Licenses</a>
+    </div>
+    <!-- Data source status indicator -->
+    <div id="data-status" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/10 cursor-pointer" onclick="refreshData()" title="Click to refresh data">
+      <div id="status-dot" class="w-2 h-2 rounded-full bg-[#308299]"></div>
+      <span id="status-text" class="text-[10px] font-bold uppercase tracking-wider text-[#308299]">Loading...</span>
+    </div>
     <div class="bg-surface-container px-4 py-2 rounded-lg flex items-center gap-3 border border-outline-variant/10 cursor-pointer hover:bg-surface-container-high transition-all">
       <span class="material-symbols-outlined text-sm">calendar_today</span>
       <span class="text-xs font-semibold uppercase tracking-wider">Mar 2026</span>
       <span class="material-symbols-outlined text-sm">expand_more</span>
-    </div>
-    <div class="flex items-center gap-2 pl-2 border-l border-outline-variant/20">
-      <span class="text-xs font-medium text-[#bec8cc]">R&D Team</span>
-      <span class="material-symbols-outlined text-[#7cd2ed]" style="font-variation-settings: 'FILL' 1;">account_circle</span>
     </div>
   </div>
 </nav>
@@ -90,138 +95,22 @@
   <header class="flex flex-col md:flex-row justify-between items-end gap-4">
     <div>
       <h1 class="text-3xl font-extrabold tracking-tight text-on-surface">Cost Management Report</h1>
-      <p class="text-on-surface-variant text-sm mt-1">Real-time infrastructure expenditure — Azure Cost API · T03/2026</p>
-    </div>
-    <div class="flex gap-3">
-      <div class="bg-primary-container text-on-primary-container px-5 py-2 rounded-lg font-bold text-sm flex items-center gap-2 shadow-lg shadow-primary/10 cursor-pointer active:scale-95 transition-all">
-        <span class="material-symbols-outlined text-sm">download</span>
-        Export Report
-      </div>
+      <p id="header-subtitle" class="text-on-surface-variant text-sm mt-1">Real-time infrastructure expenditure — Azure Cost API · T03/2026</p>
     </div>
   </header>
 
-  <!-- KPI Strip — REAL DATA -->
-  <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
-    <div class="bg-surface-container-low border border-primary/20 rounded-full px-6 py-3 flex flex-col items-center justify-center text-center">
-      <span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Total T03</span>
-      <span class="text-xl font-bold tabular-nums text-primary">$1,681</span>
-    </div>
-    <div class="bg-surface-container-low border border-outline-variant/20 rounded-full px-6 py-3 flex flex-col items-center justify-center text-center">
-      <span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Azure MTD</span>
-      <span class="text-xl font-bold tabular-nums">$1,091</span>
-    </div>
-    <div class="bg-surface-container-low border border-outline-variant/20 rounded-full px-6 py-3 flex flex-col items-center justify-center text-center">
-      <span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Google</span>
-      <span class="text-xl font-bold tabular-nums">$471</span>
-    </div>
-    <div class="bg-surface-container-low border border-outline-variant/20 rounded-full px-6 py-3 flex flex-col items-center justify-center text-center">
-      <span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">M365</span>
-      <span class="text-xl font-bold tabular-nums">$119</span>
-    </div>
-    <div class="bg-surface-container-low border border-outline-variant/20 rounded-full px-6 py-3 flex flex-col items-center justify-center text-center">
-      <span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Q1 Total</span>
-      <span class="text-xl font-bold tabular-nums">$3,407</span>
-    </div>
-    <div class="bg-surface-container-low border border-tertiary/20 rounded-full px-6 py-3 flex flex-col items-center justify-center text-center">
-      <span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold text-tertiary">vs T02</span>
-      <div class="flex items-center gap-1">
-        <span class="material-symbols-outlined text-tertiary text-sm">trending_down</span>
-        <span class="text-xl font-bold tabular-nums text-tertiary">↓7%</span>
-      </div>
-    </div>
-    <div class="bg-surface-container-low border border-secondary/20 rounded-full px-6 py-3 flex flex-col items-center justify-center text-center">
-      <span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Forecast</span>
-      <span class="text-xl font-bold tabular-nums text-secondary">~$1,255</span>
-    </div>
+  <!-- KPI Strip -->
+  <section id="kpi-strip" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <!-- KPIs will be rendered dynamically -->
   </section>
 
   <!-- Breakdown Cards -->
-  <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Azure -->
-    <div class="bg-surface-container rounded-xl p-6 flex flex-col gap-6 group hover:bg-surface-container-high transition-colors">
-      <div class="flex justify-between items-center">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-            <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">cloud</span>
-          </div>
-          <h3 class="font-bold text-lg">Azure Cloud</h3>
-        </div>
-        <span class="text-sm font-bold text-primary tabular-nums">$1,090.73</span>
-      </div>
-      <div class="space-y-4">
-        <div>
-          <div class="flex justify-between items-end"><span class="text-xs text-on-surface-variant font-medium">Microsoft.Fabric</span><span class="text-sm font-bold tabular-nums">$816.64</span></div>
-          <div class="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden mt-1"><div class="bg-primary h-full" style="width:75%"></div></div>
-        </div>
-        <div>
-          <div class="flex justify-between items-end"><span class="text-xs text-on-surface-variant font-medium">Virtual Machines</span><span class="text-sm font-bold tabular-nums">$223.79</span></div>
-          <div class="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden mt-1"><div class="bg-primary/60 h-full" style="width:21%"></div></div>
-        </div>
-        <div>
-          <div class="flex justify-between items-end"><span class="text-xs text-on-surface-variant font-medium">Infrastructure</span><span class="text-sm font-bold tabular-nums">$50.30</span></div>
-          <div class="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden mt-1"><div class="bg-primary/30 h-full" style="width:5%"></div></div>
-        </div>
-      </div>
-    </div>
-    <!-- Google -->
-    <div class="bg-surface-container rounded-xl p-6 flex flex-col gap-6 group hover:bg-surface-container-high transition-colors">
-      <div class="flex justify-between items-center">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-            <span class="material-symbols-outlined text-[#fbbf24]" style="font-variation-settings: 'FILL' 1;">cloud</span>
-          </div>
-          <h3 class="font-bold text-lg">Google Cloud</h3>
-        </div>
-        <span class="text-sm font-bold text-[#fbbf24] tabular-nums">$471.26</span>
-      </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div class="bg-surface-container-low p-4 rounded-lg flex flex-col gap-1">
-          <span class="text-[10px] font-bold text-on-surface-variant uppercase">Workspace</span>
-          <span class="text-xl font-bold tabular-nums">$420</span>
-        </div>
-        <div class="bg-surface-container-low p-4 rounded-lg flex flex-col gap-1">
-          <span class="text-[10px] font-bold text-on-surface-variant uppercase">AI Studio</span>
-          <span class="text-xl font-bold tabular-nums">$48</span>
-        </div>
-      </div>
-      <div class="mt-auto pt-4 border-t border-outline-variant/10">
-        <div class="flex items-center justify-between text-[11px] text-on-surface-variant">
-          <span>Billing Account</span>
-          <span class="font-bold text-on-surface">01E5FF-07AFF5</span>
-        </div>
-      </div>
-    </div>
-    <!-- M365 -->
-    <div class="bg-surface-container rounded-xl p-6 flex flex-col gap-6 group hover:bg-surface-container-high transition-colors">
-      <div class="flex justify-between items-center">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center">
-            <span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">apps</span>
-          </div>
-          <h3 class="font-bold text-lg">M365 Licenses</h3>
-        </div>
-        <span class="text-sm font-bold text-tertiary tabular-nums">$119.00</span>
-      </div>
-      <div class="space-y-3">
-        <div class="flex items-center justify-between p-3 bg-surface-container-low rounded-lg">
-          <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-primary"></div><span class="text-xs font-medium">Power Apps ×3</span></div>
-          <span class="text-xs font-bold tabular-nums">$60</span>
-        </div>
-        <div class="flex items-center justify-between p-3 bg-surface-container-low rounded-lg">
-          <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-secondary"></div><span class="text-xs font-medium">M365 Business Premium ×2</span></div>
-          <span class="text-xs font-bold tabular-nums">$44</span>
-        </div>
-        <div class="flex items-center justify-between p-3 bg-surface-container-low rounded-lg">
-          <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-tertiary"></div><span class="text-xs font-medium">Power Automate ×1</span></div>
-          <span class="text-xs font-bold tabular-nums">$15</span>
-        </div>
-      </div>
-    </div>
+  <section id="breakdown-cards" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Cards will be rendered dynamically -->
   </section>
 
-  <!-- Charts Grid (2×2) — Chart.js with REAL DATA -->
+  <!-- Charts Grid (2×2) -->
   <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Monthly Stacked Bar -->
     <div class="bg-surface-container rounded-xl p-6 flex flex-col gap-4">
       <div class="flex justify-between items-center">
         <h4 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant">Monthly Multi-Cloud Trend</h4>
@@ -229,26 +118,23 @@
       </div>
       <canvas id="c-monthly" class="w-full" style="max-height:260px"></canvas>
     </div>
-    <!-- Vendor Donut -->
     <div class="bg-surface-container rounded-xl p-6 flex flex-col gap-4">
       <div class="flex justify-between items-center">
         <h4 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant">Vendor Distribution — T03</h4>
-        <span class="text-xs font-bold text-primary">Active</span>
+        <span id="vendor-badge" class="text-xs font-bold text-primary">Active</span>
       </div>
       <canvas id="c-vendor" class="w-full" style="max-height:260px"></canvas>
     </div>
-    <!-- Azure Services H-Bar -->
     <div class="bg-surface-container rounded-xl p-6 flex flex-col gap-4">
       <h4 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant">Azure Services — Q1 Total</h4>
       <canvas id="c-services" class="w-full" style="max-height:260px"></canvas>
     </div>
-    <!-- Daily Cost Line -->
     <div class="bg-surface-container rounded-xl p-6 flex flex-col gap-4">
       <div class="flex justify-between items-center">
         <h4 class="text-sm font-bold uppercase tracking-widest text-on-surface-variant">Daily Cost — T03/2026</h4>
-        <div class="flex items-center gap-2 text-[10px] font-bold text-tertiary bg-tertiary/10 px-2 py-1 rounded">
+        <div id="live-badge" class="flex items-center gap-2 text-[10px] font-bold text-[#E66C37] bg-[#E66C37]/10 px-2 py-1 rounded">
           <span class="material-symbols-outlined text-xs">auto_graph</span>
-          LIVE DATA
+          <span id="live-badge-text">LOADING</span>
         </div>
       </div>
       <canvas id="c-daily" class="w-full" style="max-height:260px"></canvas>
@@ -274,20 +160,8 @@
           <th class="text-right px-6 py-3 text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">%</th>
         </tr>
       </thead>
-      <tbody class="text-xs">
-        <tr class="hover:bg-surface-container-highest transition-colors"><td class="px-6 py-3">Microsoft Fabric</td><td class="text-right px-4 py-3 tabular-nums">$104</td><td class="text-right px-4 py-3 tabular-nums">$756</td><td class="text-right px-4 py-3 tabular-nums font-bold">$817</td><td class="text-right px-4 py-3 tabular-nums font-bold text-primary">$1,677</td><td class="text-right px-6 py-3">65%</td></tr>
-        <tr class="hover:bg-surface-container-highest transition-colors"><td class="px-6 py-3">Virtual Machines</td><td class="text-right px-4 py-3 tabular-nums">$269</td><td class="text-right px-4 py-3 tabular-nums">$242</td><td class="text-right px-4 py-3 tabular-nums font-bold">$224</td><td class="text-right px-4 py-3 tabular-nums font-bold text-primary">$735</td><td class="text-right px-6 py-3">28%</td></tr>
-        <tr class="hover:bg-surface-container-highest transition-colors"><td class="px-6 py-3">Storage</td><td class="text-right px-4 py-3 tabular-nums">$30</td><td class="text-right px-4 py-3 tabular-nums">$30</td><td class="text-right px-4 py-3 tabular-nums font-bold">$26</td><td class="text-right px-4 py-3 tabular-nums font-bold text-primary">$86</td><td class="text-right px-6 py-3">3%</td></tr>
-        <tr class="hover:bg-surface-container-highest transition-colors"><td class="px-6 py-3">Virtual Network</td><td class="text-right px-4 py-3 tabular-nums">$30</td><td class="text-right px-4 py-3 tabular-nums">$27</td><td class="text-right px-4 py-3 tabular-nums font-bold">$24</td><td class="text-right px-4 py-3 tabular-nums font-bold text-primary">$81</td><td class="text-right px-6 py-3">3%</td></tr>
-        <tr class="hover:bg-surface-container-highest transition-colors"><td class="px-6 py-3">Foundry Models</td><td class="text-right px-4 py-3 tabular-nums">$0.05</td><td class="text-right px-4 py-3 tabular-nums">$0.04</td><td class="text-right px-4 py-3 tabular-nums font-bold">$0.10</td><td class="text-right px-4 py-3 tabular-nums font-bold text-primary">$0.19</td><td class="text-right px-6 py-3">&lt;1%</td></tr>
-        <tr class="bg-surface-container-low font-bold border-t-2 border-primary-container">
-          <td class="px-6 py-3">TỔNG AZURE</td>
-          <td class="text-right px-4 py-3 tabular-nums">$433</td>
-          <td class="text-right px-4 py-3 tabular-nums">$1,055</td>
-          <td class="text-right px-4 py-3 tabular-nums text-primary">$1,091</td>
-          <td class="text-right px-4 py-3 tabular-nums text-primary">$2,579</td>
-          <td class="text-right px-6 py-3">100%</td>
-        </tr>
+      <tbody id="svc-table" class="text-xs">
+        <!-- Rows rendered dynamically -->
       </tbody>
     </table>
   </section>
@@ -295,137 +169,744 @@
 </main>
 
 <!-- Footer -->
-<footer class="w-full py-6 mt-auto border-t border-[#191f31] flex flex-col md:flex-row justify-between items-center px-12 opacity-60">
+<footer class="w-full py-6 mt-auto border-t border-[#132844] flex flex-col md:flex-row justify-between items-center px-12 opacity-60">
   <div class="flex flex-col gap-1 items-center md:items-start">
-    <span class="font-['Inter'] text-[10px] text-[#bec8cc] uppercase tracking-widest">📊 Wecare Billing Report — Azure Cost API · Google Billing · M365 Admin</span>
-    <span class="font-['Inter'] text-[10px] text-[#7cd2ed] uppercase tracking-widest">Data cập nhật: 27/03/2026 10:35 ICT · Subscription: b230aef2</span>
+    <span class="font-['Inter'] text-[10px] text-[#308299] uppercase tracking-widest">📊 Wecare Billing Report — Azure Cost API · Google Billing · M365 Admin</span>
+    <span id="footer-timestamp" class="font-['Inter'] text-[10px] text-[#118DFF] uppercase tracking-widest">Data cập nhật: Loading... · Subscription: b230aef2</span>
   </div>
   <div class="flex gap-6 mt-4 md:mt-0">
-    <span class="font-['Inter'] text-[10px] text-[#bec8cc] uppercase tracking-widest">© 2026 Wecare R&D · Precision Intelligence</span>
+    <span class="font-['Inter'] text-[10px] text-[#308299] uppercase tracking-widest">© 2026 Wecare R&D · Precision Intelligence</span>
   </div>
 </footer>
 
 <script>
-// ====================================
-// REAL DATA — from Azure Cost API
-// ====================================
-const M = [
-  { m: 'T01', az: 433.10, gg: 0, ms: 119 },
-  { m: 'T02', az: 1055.25, gg: 0, ms: 119 },
-  { m: 'T03', az: 1090.73, gg: 471.26, ms: 119 }
-];
-
-const DAILY = [
-  36.62,38.13,37.95,36.12,35.80,35.91,35.85,36.73,38.68,43.17,
-  50.06,43.70,45.53,38.50,36.30,48.12,55.31,47.92,44.99,45.31,
-  53.83,54.42,37.31,52.89,33.53,28.05
-];
-
-const RES = [
-  { n: 'wecaredb', t: 'Fabric', c: 816.64 },
-  { n: 'ecommerce', t: 'VM', c: 119.02 },
-  { n: 'wecare-ai-dev', t: 'VM', c: 59.51 },
-  { n: 'hr-vm', t: 'VM', c: 45.26 },
-  { n: 'hr-vm_osdisk', t: 'Disk', c: 16.45 },
-  { n: 'ai-dev_osdisk', t: 'Disk', c: 4.41 },
-  { n: 'ecom_osdisk', t: 'Disk', c: 4.41 }
-];
-
-// ====================================
-// CHART CONFIG
-// ====================================
-const $ = s => document.getElementById(s);
-const usd = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const C = {
-  primary: '#7cd2ed',
-  secondary: '#c0c1ff',
-  tertiary: '#45dfa4',
-  amber: '#fbbf24',
-  error: '#ffb4ab',
-  muted: '#889296',
-  border: 'rgba(62, 72, 76, 0.15)',
+// ========================================================
+// API CONFIGURATION — from PROJECT.md
+// ========================================================
+const API_CONFIG = {
+  // Billing Account 2: Công ty cổ phần Wecare Group — Azure consumption
+  azure: {
+    subscriptionId: 'b230aef2-52a0-4800-8a8d-91a6880c86a2',
+    billingAccountId: '0e0c45d9-ca8d-5a88-3a11-2e028a0d4f39:0dd97e735-6a3b-4be8-b02a-72f02dbad05b_2019-05-31',
+    billingProfileId: 'FEN6-Y2IZ-BG7-PGB',
+    apiVersion: '2023-11-01',
+    baseUrl: 'https://management.azure.com',
+    scope: 'https://management.azure.com/.default'
+  },
+  // Billing Account 1: Wecare Group Joint Stock Company — MACC (M365 licenses)
+  m365: {
+    billingAccountId: '0e0c45d9-ca8d-5a38-3a11-2e028a0d4f39:4dd47361-7ed3-47bb-b66a-a868713759b6_2019-05-31',
+    billingProfileId: 'K7JM-MPGE-BG7-PGB'
+  },
+  google: {
+    billingAccountId: '01E5FF-07AFF5-FD37C5'
+  },
+  msal: {
+    clientId: '68e90e4b-610c-4657-9d59-4d789853103f', // Admin_WECARE Service Principal
+    authority: 'https://login.microsoftonline.com/organizations',
+    redirectUri: window.location.href.split('?')[0].split('#')[0]
+  }
 };
 
-Chart.defaults.color = C.muted;
-Chart.defaults.borderColor = C.border;
-Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
-Chart.defaults.font.size = 11;
+// ========================================================
+// FALLBACK DATA — used when API is unavailable
+// ========================================================
+const FALLBACK = {
+  monthly: [
+    { m: 'T01', az: 433.10, gg: 0, ms: 119 },
+    { m: 'T02', az: 1055.25, gg: 0, ms: 119 },
+    { m: 'T03', az: 1090.73, gg: 471.26, ms: 119 }
+  ],
+  daily: [
+    36.62,38.13,37.95,36.12,35.80,35.91,35.85,36.73,38.68,43.17,
+    50.06,43.70,45.53,38.50,36.30,48.12,55.31,47.92,44.99,45.31,
+    53.83,54.42,37.31,52.89,33.53,28.05
+  ],
+  resources: [
+    { n: 'wecaredb', t: 'Fabric', c: 816.64 },
+    { n: 'ecommerce', t: 'VM', c: 119.02 },
+    { n: 'wecare-ai-dev', t: 'VM', c: 59.51 },
+    { n: 'hr-vm', t: 'VM', c: 45.26 },
+    { n: 'hr-vm_osdisk', t: 'Disk', c: 16.45 },
+    { n: 'ai-dev_osdisk', t: 'Disk', c: 4.41 },
+    { n: 'ecom_osdisk', t: 'Disk', c: 4.41 }
+  ],
+  services: [
+    { name: 'Microsoft Fabric', t01: 104, t02: 756, t03: 817 },
+    { name: 'Virtual Machines', t01: 269, t02: 242, t03: 224 },
+    { name: 'Storage', t01: 30, t02: 30, t03: 26 },
+    { name: 'Virtual Network', t01: 30, t02: 27, t03: 24 },
+    { name: 'Foundry Models', t01: 0.05, t02: 0.04, t03: 0.10 }
+  ],
+  google: { workspace: 420, aiStudio: 48, total: 471.26 },
+  m365: { total: 119, items: [
+    { name: 'Power Apps ×3', cost: 60, color: '#118DFF' },
+    { name: 'M365 Business Premium ×2', cost: 44, color: '#12239E' },
+    { name: 'Power Automate ×1', cost: 15, color: '#E66C37' }
+  ]}
+};
 
-const LEG = { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', padding: 12, font: { size: 10 } } };
-const BASE = { responsive: true, maintainAspectRatio: true };
+// ========================================================
+// STATE
+// ========================================================
+let DATA = { ...FALLBACK };
+let dataSource = 'cached'; // 'live' | 'cached'
+let msalInstance = null;
+let chartInstances = {};
 
-// Monthly Stacked Bar
-new Chart($('c-monthly'), {
-  type: 'bar',
-  data: {
-    labels: M.map(x => x.m),
-    datasets: [
-      { label: 'Azure', data: M.map(x => x.az), backgroundColor: C.primary, borderRadius: 4, borderSkipped: false },
-      { label: 'Google', data: M.map(x => x.gg), backgroundColor: C.amber, borderRadius: 4, borderSkipped: false },
-      { label: 'M365', data: M.map(x => x.ms), backgroundColor: C.secondary, borderRadius: 4, borderSkipped: false }
-    ]
-  },
-  options: { ...BASE, plugins: { legend: LEG }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, ticks: { callback: v => '$' + v } } } }
-});
+// ========================================================
+// MSAL AUTHENTICATION
+// ========================================================
+async function initMSAL() {
+  try {
+    msalInstance = new msal.PublicClientApplication({
+      auth: {
+        clientId: API_CONFIG.msal.clientId,
+        authority: API_CONFIG.msal.authority,
+        redirectUri: API_CONFIG.msal.redirectUri
+      },
+      cache: { cacheLocation: 'localStorage', storeAuthStateInCookie: true }
+    });
+    await msalInstance.initialize();
 
-// Vendor Donut
-new Chart($('c-vendor'), {
-  type: 'doughnut',
-  data: {
-    labels: ['Azure $1,091', 'Google $471', 'M365 $119'],
-    datasets: [{ data: [1091, 471, 119], backgroundColor: [C.primary, C.amber, C.secondary], borderWidth: 0, hoverOffset: 8 }]
-  },
-  options: { ...BASE, cutout: '65%', plugins: { legend: LEG } }
-});
+    // Handle redirect response (user coming back from Azure login)
+    const response = await msalInstance.handleRedirectPromise();
+    if (response) {
+      console.log('✅ Redirect login successful');
+      return response.accessToken;
+    }
 
-// Azure Services
-new Chart($('c-services'), {
-  type: 'bar',
-  data: {
-    labels: ['Microsoft Fabric', 'Virtual Machines', 'Storage', 'Virtual Network'],
-    datasets: [{ data: [1677, 735, 86, 81], backgroundColor: [C.primary, C.secondary, C.tertiary, C.amber], borderRadius: 4, borderSkipped: false }]
-  },
-  options: { ...BASE, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { callback: v => '$' + v } }, y: { grid: { display: false } } } }
-});
+    // Try silent token acquisition (cached token)
+    const accounts = msalInstance.getAllAccounts();
+    if (accounts.length > 0) {
+      try {
+        const tokenResponse = await msalInstance.acquireTokenSilent({
+          scopes: [API_CONFIG.azure.scope],
+          account: accounts[0]
+        });
+        console.log('✅ Silent token acquired');
+        return tokenResponse.accessToken;
+      } catch (silentErr) {
+        console.warn('⚠️ Silent token failed, redirecting to login...');
+        // Silent failed → redirect to login
+        await msalInstance.acquireTokenRedirect({ scopes: [API_CONFIG.azure.scope] });
+        return null; // Page will redirect, won't reach here
+      }
+    }
 
-// Daily Cost Line
-new Chart($('c-daily'), {
-  type: 'line',
-  data: {
-    labels: DAILY.map((_, i) => (i + 1).toString().padStart(2, '0')),
-    datasets: [{
-      label: 'Daily Cost',
-      data: DAILY,
-      borderColor: C.primary,
-      backgroundColor: C.primary + '18',
-      fill: true,
-      tension: 0.3,
-      pointRadius: 2.5,
-      pointBackgroundColor: C.primary,
-      borderWidth: 2.5
-    }]
-  },
-  options: {
-    ...BASE,
-    plugins: { legend: { display: false } },
-    scales: { x: { grid: { display: false }, ticks: { font: { size: 9 } } }, y: { beginAtZero: true, ticks: { callback: v => '$' + v } } }
+    // No account found → redirect to Azure login
+    console.log('🔑 No account found, redirecting to Azure login...');
+    await msalInstance.acquireTokenRedirect({ scopes: [API_CONFIG.azure.scope] });
+    return null; // Page will redirect
+  } catch (err) {
+    console.warn('⚠️ MSAL auth failed:', err.message);
+    return null;
   }
-});
+}
 
-// Resource Bars
-const mx = RES[0].c;
-const tc = { Fabric: C.primary, VM: C.secondary, Disk: C.amber };
-$('res-bars').innerHTML = RES.map(r => {
-  const pct = (r.c / mx * 100).toFixed(0);
-  const col = tc[r.t] || C.error;
-  return `<div class="flex items-center gap-3">
-    <div class="text-xs text-on-surface-variant min-w-[100px] text-right truncate font-medium">${r.n}</div>
-    <div class="flex-1 h-5 bg-surface-container-lowest rounded overflow-hidden">
-      <div class="h-full rounded flex items-center pl-2 text-[10px] text-white font-bold transition-all duration-700" style="width:${pct}%;background:${col}">${pct > 15 ? usd(r.c) : ''}</div>
+// ========================================================
+// AZURE COST MANAGEMENT API
+// ========================================================
+async function azureFetch(endpoint, body, token) {
+  const url = `${API_CONFIG.azure.baseUrl}/subscriptions/${API_CONFIG.azure.subscriptionId}/providers/Microsoft.CostManagement/${endpoint}?api-version=${API_CONFIG.azure.apiVersion}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`Azure API ${res.status}: ${res.statusText}`);
+  return res.json();
+}
+
+// Monthly cost by service
+async function fetchMonthlyCostByService(token) {
+  const now = new Date();
+  const year = now.getFullYear();
+  const data = await azureFetch('query', {
+    type: 'ActualCost',
+    timeframe: 'Custom',
+    timePeriod: { from: `${year}-01-01`, to: `${year}-12-31` },
+    dataset: {
+      granularity: 'Monthly',
+      aggregation: { totalCost: { name: 'CostUSD', function: 'Sum' } },
+      grouping: [{ type: 'Dimension', name: 'ServiceName' }]
+    }
+  }, token);
+  return data.properties?.rows || [];
+}
+
+// Daily cost for current month
+async function fetchDailyCost(token) {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
+  const data = await azureFetch('query', {
+    type: 'ActualCost',
+    timeframe: 'Custom',
+    timePeriod: { from: `${y}-${m}-01`, to: `${y}-${m}-${lastDay}` },
+    dataset: {
+      granularity: 'Daily',
+      aggregation: { totalCost: { name: 'CostUSD', function: 'Sum' } }
+    }
+  }, token);
+  return data.properties?.rows || [];
+}
+
+// Top resources
+async function fetchTopResources(token) {
+  const data = await azureFetch('query', {
+    type: 'ActualCost',
+    timeframe: 'MonthToDate',
+    dataset: {
+      granularity: 'None',
+      aggregation: { totalCost: { name: 'CostUSD', function: 'Sum' } },
+      grouping: [
+        { type: 'Dimension', name: 'ResourceId' },
+        { type: 'Dimension', name: 'ResourceType' }
+      ],
+      sorting: [{ direction: 'descending', name: 'CostUSD' }]
+    }
+  }, token);
+  return data.properties?.rows || [];
+}
+
+// Forecast
+async function fetchForecast(token) {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const lastDay = new Date(y, now.getMonth() + 1, 0).getDate();
+  try {
+    const data = await azureFetch('forecast', {
+      type: 'ActualCost',
+      timeframe: 'Custom',
+      timePeriod: { from: `${y}-${m}-01`, to: `${y}-${m}-${lastDay}` },
+      dataset: {
+        granularity: 'Daily',
+        aggregation: { totalCost: { name: 'CostUSD', function: 'Sum' } }
+      },
+      includeActualCost: true,
+      includeFreshPartialCost: false
+    }, token);
+    const rows = data.properties?.rows || [];
+    return rows.reduce((sum, r) => sum + (r[0] || 0), 0);
+  } catch { return null; }
+}
+
+// ========================================================
+// M365 COSTS — via Billing Profile scope (MACC account)
+// ========================================================
+async function billingProfileFetch(endpoint, body, token) {
+  const scope = `providers/Microsoft.Billing/billingAccounts/${API_CONFIG.m365.billingAccountId}/billingProfiles/${API_CONFIG.m365.billingProfileId}`;
+  const url = `${API_CONFIG.azure.baseUrl}/${scope}/providers/Microsoft.CostManagement/${endpoint}?api-version=${API_CONFIG.azure.apiVersion}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error(`M365 Billing API ${res.status}: ${res.statusText}`);
+  return res.json();
+}
+
+// M365 monthly cost by product
+async function fetchM365Costs(token) {
+  const now = new Date();
+  const year = now.getFullYear();
+  try {
+    const data = await billingProfileFetch('query', {
+      type: 'ActualCost',
+      timeframe: 'Custom',
+      timePeriod: { from: `${year}-01-01`, to: `${year}-12-31` },
+      dataset: {
+        granularity: 'Monthly',
+        aggregation: { totalCost: { name: 'CostUSD', function: 'Sum' } },
+        grouping: [{ type: 'Dimension', name: 'ProductOrderName' }]
+      }
+    }, token);
+    return data.properties?.rows || [];
+  } catch (err) {
+    console.warn('⚠️ M365 billing API error:', err.message);
+    return [];
+  }
+}
+
+// Google billing — hardcoded (no REST API, manual update from Console)
+
+// ========================================================
+// DATA PROCESSING
+// ========================================================
+function processAzureMonthly(rows) {
+  // rows: [cost, date, serviceName, currency]
+  const byMonth = {};
+  rows.forEach(r => {
+    const cost = r[0];
+    const date = new Date(r[1] * 1 || r[1]);
+    const monthKey = `T${String(date.getMonth() + 1).padStart(2, '0')}`;
+    if (!byMonth[monthKey]) byMonth[monthKey] = { total: 0, services: {} };
+    byMonth[monthKey].total += cost;
+    const svc = r[2] || 'Other';
+    byMonth[monthKey].services[svc] = (byMonth[monthKey].services[svc] || 0) + cost;
+  });
+  return byMonth;
+}
+
+function processAzureDaily(rows) {
+  // rows: [cost, date, currency]
+  return rows.map(r => ({
+    cost: r[0],
+    date: new Date(r[1] * 1 || r[1])
+  })).sort((a, b) => a.date - b.date);
+}
+
+function processResources(rows) {
+  // rows: [cost, resourceId, resourceType, currency]
+  return rows.slice(0, 10).map(r => {
+    const parts = (r[1] || '').split('/');
+    const name = parts[parts.length - 1] || 'unknown';
+    const typeParts = (r[2] || '').split('/');
+    const type = typeParts[typeParts.length - 1] || 'Other';
+    return { n: name, t: type, c: r[0] };
+  });
+}
+
+// ========================================================
+// MAIN DATA LOADER
+// ========================================================
+async function loadData() {
+  setStatus('loading', 'Connecting...');
+
+  // Try Azure API
+  const token = await initMSAL();
+  let azureLive = false;
+
+  if (token) {
+    try {
+      console.log('🔑 Azure token acquired, fetching data...');
+      const [monthlyRows, dailyRows, resourceRows, forecast, m365Rows] = await Promise.all([
+        fetchMonthlyCostByService(token),
+        fetchDailyCost(token),
+        fetchTopResources(token),
+        fetchForecast(token),
+        fetchM365Costs(token)
+      ]);
+
+      if (monthlyRows.length > 0) {
+        const byMonth = processAzureMonthly(monthlyRows);
+        // Update monthly data
+        DATA.monthly = Object.keys(byMonth).sort().map(m => ({
+          m, az: byMonth[m].total, gg: DATA.monthly.find(x => x.m === m)?.gg || 0, ms: 119
+        }));
+        // Update services data from latest month + Q1
+        const allServices = {};
+        Object.keys(byMonth).forEach(m => {
+          const monthNum = parseInt(m.replace('T', ''));
+          Object.entries(byMonth[m].services).forEach(([svc, cost]) => {
+            if (!allServices[svc]) allServices[svc] = { name: svc };
+            allServices[svc][`t${String(monthNum).padStart(2, '0')}`] = cost;
+          });
+        });
+        DATA.services = Object.values(allServices)
+          .map(s => ({ ...s, total: (s.t01 || 0) + (s.t02 || 0) + (s.t03 || 0) }))
+          .sort((a, b) => b.total - a.total)
+          .slice(0, 8);
+        azureLive = true;
+      }
+
+      if (dailyRows.length > 0) {
+        const daily = processAzureDaily(dailyRows);
+        DATA.daily = daily.map(d => d.cost);
+        azureLive = true;
+      }
+
+      if (resourceRows.length > 0) {
+        DATA.resources = processResources(resourceRows);
+        azureLive = true;
+      }
+
+      if (forecast !== null) {
+        DATA.forecast = forecast;
+      }
+
+      // Process M365 costs from billing profile
+      if (m365Rows.length > 0) {
+        const m365ByMonth = {};
+        const m365Products = {};
+        m365Rows.forEach(r => {
+          const cost = r[0];
+          const date = new Date(r[1] * 1 || r[1]);
+          const monthKey = `T${String(date.getMonth() + 1).padStart(2, '0')}`;
+          m365ByMonth[monthKey] = (m365ByMonth[monthKey] || 0) + cost;
+          const product = r[2] || 'Other';
+          m365Products[product] = (m365Products[product] || 0) + cost;
+        });
+        // Update monthly M365 costs
+        DATA.monthly.forEach(m => {
+          if (m365ByMonth[m.m] !== undefined) m.ms = m365ByMonth[m.m];
+        });
+        // Update M365 license breakdown
+        const colors = ['#118DFF', '#12239E', '#E66C37', '#6B007B'];
+        DATA.m365.items = Object.entries(m365Products)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([name, cost], i) => ({ name, cost: Math.round(cost * 100) / 100, color: colors[i % colors.length] }));
+        DATA.m365.total = Object.values(m365ByMonth).reduce((s, v) => Math.max(s, v), 0);
+        console.log('✅ M365 data loaded from billing profile');
+      }
+
+      console.log('✅ Azure data loaded successfully');
+    } catch (err) {
+      console.warn('⚠️ Azure API error:', err.message);
+    }
+  }
+
+  // Set final status
+  dataSource = azureLive ? 'live' : 'cached';
+  setStatus(dataSource, azureLive ? 'Live API' : 'Cached Data');
+
+  return DATA;
+}
+
+// ========================================================
+// UI HELPERS
+// ========================================================
+const el = s => document.getElementById(s);
+const usd = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const usdShort = n => n >= 1000 ? '$' + (n/1000).toFixed(1) + 'k' : '$' + Math.round(n);
+
+const CLR = {
+  primary: '#118DFF',
+  secondary: '#12239E',
+  tertiary: '#E66C37',
+  purple: '#6B007B',
+  text: '#308299',
+  muted: '#308299',
+  border: 'rgba(30, 51, 80, 0.3)',
+};
+
+function setStatus(type, text) {
+  const dot = el('status-dot');
+  const label = el('status-text');
+  if (type === 'live') {
+    dot.className = 'w-2 h-2 rounded-full bg-[#45dfa4] pulse-dot';
+    label.textContent = text;
+    label.className = 'text-[10px] font-bold uppercase tracking-wider text-[#45dfa4]';
+  } else if (type === 'loading') {
+    dot.className = 'w-2 h-2 rounded-full bg-[#E66C37] pulse-dot';
+    label.textContent = text;
+    label.className = 'text-[10px] font-bold uppercase tracking-wider text-[#E66C37]';
+  } else {
+    dot.className = 'w-2 h-2 rounded-full bg-[#308299]';
+    label.textContent = text;
+    label.className = 'text-[10px] font-bold uppercase tracking-wider text-[#308299]';
+  }
+}
+
+// ========================================================
+// RENDER FUNCTIONS
+// ========================================================
+function renderKPIs(data) {
+  const latest = data.monthly[data.monthly.length - 1];
+  const prev = data.monthly.length > 1 ? data.monthly[data.monthly.length - 2] : null;
+  const totalNow = latest.az + latest.gg + latest.ms;
+  const totalPrev = prev ? prev.az + prev.gg + prev.ms : 0;
+  const momPct = totalPrev > 0 ? ((totalNow - totalPrev) / totalPrev * 100) : 0;
+  const momDir = momPct >= 0 ? '↑' : '↓';
+  const momIcon = momPct >= 0 ? 'trending_up' : 'trending_down';
+  const forecast = data.forecast || Math.round(latest.az / (new Date().getDate()) * 30);
+
+  el('kpi-strip').innerHTML = `
+    <div class="bg-surface-container-low border border-primary/30 rounded-full px-6 py-3 flex flex-col items-center justify-center text-center">
+      <span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Total ${latest.m}</span>
+      <span class="text-xl font-bold tabular-nums text-primary">${usdShort(totalNow)}</span>
     </div>
-    <div class="text-xs text-on-surface-variant min-w-[60px] text-right tabular-nums font-bold">${usd(r.c)}</div>
-  </div>`;
-}).join('');
+    <div class="bg-surface-container-low border border-outline-variant/20 rounded-full px-6 py-3 flex flex-col items-center justify-center text-center">
+      <span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Azure MTD</span>
+      <span class="text-xl font-bold tabular-nums">${usdShort(latest.az)}</span>
+    </div>
+    <div class="bg-surface-container-low border border-outline-variant/20 rounded-full px-6 py-3 flex flex-col items-center justify-center text-center">
+      <span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Google</span>
+      <span class="text-xl font-bold tabular-nums">${usdShort(latest.gg)}</span>
+    </div>
+    <div class="bg-surface-container-low border border-outline-variant/20 rounded-full px-6 py-3 flex flex-col items-center justify-center text-center">
+      <span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">M365</span>
+      <span class="text-xl font-bold tabular-nums">${usdShort(latest.ms)}</span>
+    </div>
+    <div class="bg-surface-container-low border border-tertiary/20 rounded-full px-6 py-3 flex flex-col items-center justify-center text-center">
+      <span class="text-[10px] uppercase tracking-widest font-bold text-tertiary">vs ${prev?.m || '—'}</span>
+      <div class="flex items-center gap-1">
+        <span class="material-symbols-outlined text-tertiary text-sm">${momIcon}</span>
+        <span class="text-xl font-bold tabular-nums text-tertiary">${momDir}${Math.abs(momPct).toFixed(0)}%</span>
+      </div>
+    </div>
+    <div class="bg-surface-container-low border border-[#6B007B]/30 rounded-full px-6 py-3 flex flex-col items-center justify-center text-center">
+      <span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Forecast</span>
+      <span class="text-xl font-bold tabular-nums text-[#a855f7]">~${usdShort(forecast)}</span>
+    </div>
+  `;
+}
+
+function renderBreakdownCards(data) {
+  const latest = data.monthly[data.monthly.length - 1];
+  const topServices = data.services.slice(0, 3);
+  const maxSvc = topServices[0]?.t03 || 1;
+
+  el('breakdown-cards').innerHTML = `
+    <!-- Azure -->
+    <div class="bg-surface-container rounded-xl p-6 flex flex-col gap-6 group hover:bg-surface-container-high transition-colors">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-[#118DFF]/10 flex items-center justify-center">
+            <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">cloud</span>
+          </div>
+          <h3 class="font-bold text-lg">Azure Cloud</h3>
+        </div>
+        <span class="text-sm font-bold text-primary tabular-nums">${usd(latest.az)}</span>
+      </div>
+      <div class="space-y-4">
+        ${topServices.map(s => {
+          const pct = Math.round((s.t03 || 0) / latest.az * 100);
+          return `<div>
+            <div class="flex justify-between items-end"><span class="text-xs text-on-surface-variant font-medium">${s.name}</span><span class="text-sm font-bold tabular-nums">${usd(s.t03 || 0)}</span></div>
+            <div class="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden mt-1"><div class="bg-primary h-full" style="width:${pct}%;opacity:${Math.max(0.3, pct/100)}"></div></div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    <!-- Google -->
+    <div class="bg-surface-container rounded-xl p-6 flex flex-col gap-6 group hover:bg-surface-container-high transition-colors">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-[#E66C37]/10 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[#E66C37]" style="font-variation-settings: 'FILL' 1;">cloud</span>
+          </div>
+          <h3 class="font-bold text-lg">Google Cloud</h3>
+        </div>
+        <span class="text-sm font-bold text-[#E66C37] tabular-nums">${usd(latest.gg)}</span>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-surface-container-low p-4 rounded-lg flex flex-col gap-1">
+          <span class="text-[10px] font-bold text-on-surface-variant uppercase">Workspace</span>
+          <span class="text-xl font-bold tabular-nums">${usdShort(data.google.workspace || 0)}</span>
+        </div>
+        <div class="bg-surface-container-low p-4 rounded-lg flex flex-col gap-1">
+          <span class="text-[10px] font-bold text-on-surface-variant uppercase">AI Studio</span>
+          <span class="text-xl font-bold tabular-nums">${usdShort(data.google.aiStudio || 0)}</span>
+        </div>
+      </div>
+      <div class="mt-auto pt-4 border-t border-outline-variant/10">
+        <div class="flex items-center justify-between text-[11px] text-on-surface-variant">
+          <span>Billing Account</span>
+          <span class="font-bold text-on-surface">${API_CONFIG.google.billingAccountId.substring(0, 12)}</span>
+        </div>
+      </div>
+    </div>
+    <!-- M365 -->
+    <div class="bg-surface-container rounded-xl p-6 flex flex-col gap-6 group hover:bg-surface-container-high transition-colors">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-[#6B007B]/10 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[#a855f7]" style="font-variation-settings: 'FILL' 1;">apps</span>
+          </div>
+          <h3 class="font-bold text-lg">M365 Licenses</h3>
+        </div>
+        <span class="text-sm font-bold text-[#a855f7] tabular-nums">${usd(data.m365.total)}</span>
+      </div>
+      <div class="space-y-3">
+        ${data.m365.items.map(i => `
+          <div class="flex items-center justify-between p-3 bg-surface-container-low rounded-lg">
+            <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full" style="background:${i.color}"></div><span class="text-xs font-medium">${i.name}</span></div>
+            <span class="text-xs font-bold tabular-nums">$${i.cost}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderCharts(data) {
+  Chart.defaults.color = CLR.text;
+  Chart.defaults.borderColor = CLR.border;
+  Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+  Chart.defaults.font.size = 11;
+  const LEG = { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'circle', padding: 12, font: { size: 10 } } };
+  const BASE = { responsive: true, maintainAspectRatio: true };
+
+  // Destroy existing charts
+  Object.values(chartInstances).forEach(c => c.destroy());
+
+  // Monthly Stacked Bar
+  chartInstances.monthly = new Chart(el('c-monthly'), {
+    type: 'bar',
+    data: {
+      labels: data.monthly.map(x => x.m),
+      datasets: [
+        { label: 'Azure', data: data.monthly.map(x => x.az), backgroundColor: CLR.primary, borderRadius: 4, borderSkipped: false },
+        { label: 'Google', data: data.monthly.map(x => x.gg), backgroundColor: CLR.tertiary, borderRadius: 4, borderSkipped: false },
+        { label: 'M365', data: data.monthly.map(x => x.ms), backgroundColor: CLR.secondary, borderRadius: 4, borderSkipped: false }
+      ]
+    },
+    options: { ...BASE, plugins: { legend: LEG }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, ticks: { callback: v => '$' + v } } } }
+  });
+
+  // Vendor Donut
+  const latest = data.monthly[data.monthly.length - 1];
+  chartInstances.vendor = new Chart(el('c-vendor'), {
+    type: 'doughnut',
+    data: {
+      labels: [`Azure ${usdShort(latest.az)}`, `Google ${usdShort(latest.gg)}`, `M365 ${usdShort(latest.ms)}`],
+      datasets: [{ data: [latest.az, latest.gg, latest.ms], backgroundColor: [CLR.primary, CLR.tertiary, CLR.purple], borderWidth: 0, hoverOffset: 8 }]
+    },
+    options: { ...BASE, cutout: '65%', plugins: { legend: LEG } }
+  });
+
+  // Azure Services H-Bar
+  const svcNames = data.services.map(s => s.name);
+  const svcTotals = data.services.map(s => (s.t01 || 0) + (s.t02 || 0) + (s.t03 || 0));
+  const svcColors = [CLR.primary, CLR.secondary, CLR.tertiary, CLR.purple, CLR.primary + '99', CLR.secondary + '99', CLR.tertiary + '99', CLR.purple + '99'];
+  chartInstances.services = new Chart(el('c-services'), {
+    type: 'bar',
+    data: {
+      labels: svcNames,
+      datasets: [{ data: svcTotals, backgroundColor: svcColors.slice(0, svcNames.length), borderRadius: 4, borderSkipped: false }]
+    },
+    options: { ...BASE, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { callback: v => '$' + v } }, y: { grid: { display: false } } } }
+  });
+
+  // Daily Cost Line
+  chartInstances.daily = new Chart(el('c-daily'), {
+    type: 'line',
+    data: {
+      labels: data.daily.map((_, i) => (i + 1).toString().padStart(2, '0')),
+      datasets: [{
+        label: 'Daily Cost',
+        data: data.daily,
+        borderColor: CLR.primary,
+        backgroundColor: CLR.primary + '18',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 2.5,
+        pointBackgroundColor: CLR.primary,
+        borderWidth: 2.5
+      }]
+    },
+    options: {
+      ...BASE,
+      plugins: { legend: { display: false } },
+      scales: { x: { grid: { display: false }, ticks: { font: { size: 9 } } }, y: { beginAtZero: true, ticks: { callback: v => '$' + v } } }
+    }
+  });
+
+  // Update live badge
+  el('live-badge-text').textContent = dataSource === 'live' ? 'LIVE DATA' : 'CACHED DATA';
+}
+
+function renderResourceBars(data) {
+  const resources = data.resources;
+  if (!resources.length) return;
+  const mx = resources[0].c;
+  const typeColors = {
+    Fabric: CLR.primary, fabric: CLR.primary, capacities: CLR.primary,
+    VM: CLR.secondary, virtualMachines: CLR.secondary,
+    Disk: CLR.tertiary, disks: CLR.tertiary,
+    storageAccounts: CLR.tertiary
+  };
+  el('res-bars').innerHTML = resources.map(r => {
+    const pct = (r.c / mx * 100).toFixed(0);
+    const col = typeColors[r.t] || CLR.purple;
+    return `<div class="flex items-center gap-3">
+      <div class="text-xs text-on-surface-variant min-w-[100px] text-right truncate font-medium">${r.n}</div>
+      <div class="flex-1 h-5 bg-surface-container-lowest rounded overflow-hidden">
+        <div class="h-full rounded flex items-center pl-2 text-[10px] text-white font-bold transition-all duration-700" style="width:${pct}%;background:${col}">${pct > 15 ? usd(r.c) : ''}</div>
+      </div>
+      <div class="text-xs text-on-surface-variant min-w-[60px] text-right tabular-nums font-bold">${usd(r.c)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderServiceTable(data) {
+  const totalAz = data.services.reduce((s, r) => s + (r.t01 || 0) + (r.t02 || 0) + (r.t03 || 0), 0);
+  const totalT01 = data.services.reduce((s, r) => s + (r.t01 || 0), 0);
+  const totalT02 = data.services.reduce((s, r) => s + (r.t02 || 0), 0);
+  const totalT03 = data.services.reduce((s, r) => s + (r.t03 || 0), 0);
+
+  const rows = data.services.map(s => {
+    const q1 = (s.t01 || 0) + (s.t02 || 0) + (s.t03 || 0);
+    const pct = totalAz > 0 ? (q1 / totalAz * 100) : 0;
+    return `<tr class="hover:bg-surface-container-highest transition-colors">
+      <td class="px-6 py-3">${s.name}</td>
+      <td class="text-right px-4 py-3 tabular-nums">${usdShort(s.t01 || 0)}</td>
+      <td class="text-right px-4 py-3 tabular-nums">${usdShort(s.t02 || 0)}</td>
+      <td class="text-right px-4 py-3 tabular-nums font-bold">${usdShort(s.t03 || 0)}</td>
+      <td class="text-right px-4 py-3 tabular-nums font-bold text-primary">${usdShort(q1)}</td>
+      <td class="text-right px-6 py-3">${pct < 1 ? '<1' : Math.round(pct)}%</td>
+    </tr>`;
+  }).join('');
+
+  el('svc-table').innerHTML = rows + `
+    <tr class="bg-surface-container-low font-bold border-t-2 border-primary">
+      <td class="px-6 py-3">TỔNG AZURE</td>
+      <td class="text-right px-4 py-3 tabular-nums">${usdShort(totalT01)}</td>
+      <td class="text-right px-4 py-3 tabular-nums">${usdShort(totalT02)}</td>
+      <td class="text-right px-4 py-3 tabular-nums text-primary">${usdShort(totalT03)}</td>
+      <td class="text-right px-4 py-3 tabular-nums text-primary">${usdShort(totalAz)}</td>
+      <td class="text-right px-6 py-3">100%</td>
+    </tr>
+  `;
+}
+
+function updateFooter() {
+  const now = new Date();
+  const ts = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth()+1).toString().padStart(2, '0')}/${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} ICT`;
+  const src = dataSource === 'live' ? '🟢 Live API' : '⚪ Cached';
+  el('footer-timestamp').textContent = `Data cập nhật: ${ts} · ${src} · Subscription: ${API_CONFIG.azure.subscriptionId.substring(0, 8)}`;
+}
+
+// ========================================================
+// MAIN RENDER
+// ========================================================
+function renderAll(data) {
+  renderKPIs(data);
+  renderBreakdownCards(data);
+  renderCharts(data);
+  renderResourceBars(data);
+  renderServiceTable(data);
+  updateFooter();
+}
+
+async function refreshData() {
+  setStatus('loading', 'Refreshing...');
+  try {
+    await loadData();
+    renderAll(DATA);
+  } catch (err) {
+    console.error('Refresh error:', err);
+    setStatus('cached', 'Error — Cached');
+  }
+}
+
+// ========================================================
+// INIT
+// ========================================================
+(async function init() {
+  // Render immediately with fallback data
+  renderAll(DATA);
+
+  // Then try to load live data
+  try {
+    await loadData();
+    renderAll(DATA);
+  } catch (err) {
+    console.warn('Init error:', err);
+    setStatus('cached', 'Cached Data');
+  }
+})();
 </script>
 
 </body>

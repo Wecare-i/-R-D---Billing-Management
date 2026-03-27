@@ -123,6 +123,22 @@
 
 > ⚠️ Key file `gcp-sa-key.json` nằm ở root folder — **KHÔNG commit lên git** (đã gitignored).
 
+#### Browser API (Billing_Report.html) — Yêu cầu bổ sung
+
+> ⚠️ **Service Principal key KHÔNG dùng được từ browser** (Azure chặn CORS cho client_credentials flow). HTML report dùng **MSAL.js redirect flow** → đăng nhập bằng account user.
+
+**Setup để chạy live API từ browser:**
+
+| # | Thao tác | Chi tiết | 1 lần? |
+|---|---|---|---|
+| 1 | **Gán role** `Cost Management Reader` cho user | Azure Portal → Subscriptions → `b230aef2...` → IAM → Add role assignment | ✅ |
+| 2 | **Thêm SPA redirect URI** vào App Registration | Entra ID → App registrations → `Admin_WECARE` → Authentication → Add SPA → `http://localhost:5500/Billing_Report.html` | ✅ |
+| 3 | **Mở qua Live Server** (VS Code) hoặc HTTP server | Chuột phải file → Open with Live Server | Mỗi lần |
+
+> 💡 Lần đầu mở trang sẽ redirect sang Azure login. Sau đó token cache trong localStorage — mở lại **không cần đăng nhập lại**.
+>
+> **Google Cloud Billing**: Không có REST API trả cost trực tiếp từ browser — data hardcoded, cập nhật thủ công hàng tháng.
+
 ---
 
 #### Quy trình hoạt động
