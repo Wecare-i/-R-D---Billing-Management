@@ -1,6 +1,8 @@
 # Credentials - SENSITIVE
 gcp-sa-key.json
 *.credentials.json
+.env
+.env.*
 
 # Invoices - sensitive billing documents
 invoices/

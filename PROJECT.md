@@ -1,17 +1,27 @@
 ## Billing Management — Quản Lý Chi Phí & Thanh Toán
 
+**Last Updated**: 2026-03-26  
+**Last Reviewed**: 2026-03-26
+
+> Quản lý thanh toán hàng tháng cho bộ phận Tech (R&D/Core): tạo phiếu bảng kê chi phí, điều tra bất thường, theo dõi billing từ Azure + Google + M365, và build Power BI dashboard tự động.
+
+---
+
 #### Mục tiêu
 1. **Quản lý thanh toán**: Tạo và fill phiếu bảng kê chi phí hàng tháng cho bộ phận Tech (R&D/Core), gởi Kế toán duyệt thanh toán.
 2. **Điều tra chi phí bất thường**: Khi phát hiện chi phí tăng đột biến → điều tra, phân tích tìm root cause, ghi nhận kết quả vào `reference/` để tái sử dụng.
+3. **Tự động hóa**: Build Power BI dashboard kết nối trực tiếp Azure Cost Management + Google Cloud Billing API để theo dõi chi phí realtime.
+
+---
 
 #### Dịch vụ đang trả phí
 
-| Vendor | Dịch vụ | Subscription ID | Ghi chú |
-|---|---|---|---|
-| **Microsoft** | Azure subscription 1 | `b230aef2-52a0-4800-8a8d-91a6880c86a2` | Cloud services chính |
-| **Microsoft** | ACC Subscription | `cc7e658b-6dcb-45b0-9646-71792cab759` | Azure Consumption Commitment (MACC) |
-| **Microsoft** | Microsoft 365 / Power Platform | — | ~~Licenses (MOSA `wecare.com.vn`)~~ — **ĐÃ HỦY** |
-| **Google** | Google Workspace / Services | Billing Account `01E5FF-07AFF5-FD37C5` | Org: `wecare-i.com`, Paid account từ 11/02/2025 |
+| Vendor | Dịch vụ | Subscription ID | Chi phí ước tính/tháng | Ghi chú |
+|---|---|---|---|---|
+| **Microsoft** | Azure subscription 1 | `b230aef2-52a0-4800-8a8d-91a6880c86a2` | ~$1,160 | Cloud services chính |
+| **Microsoft** | ACC Subscription (MACC) | `cc7e658b-6dcb-45b0-9646-71792cab759` | — | Azure Consumption Commitment |
+| ~~**Microsoft**~~ | ~~M365 / Power Platform Licenses~~ | — | ~~$119~~ | ~~MOSA `wecare.com.vn`~~ — **ĐÃ HỦY, chuyển qua MCA** (2026-03-26) |
+| **Google** | Google Workspace / Services | Billing `01E5FF-07AFF5-FD37C5` | ~$471 | Org: `wecare-i.com`, Paid account từ 11/02/2025 |
 
 #### Billing Portals — Nơi kiểm tra hóa đơn
 
@@ -23,20 +33,14 @@
 
 > ⚠️ **Lưu ý**: Power Apps/Power Platform licenses **KHÔNG** nằm trong Azure billing → phải check ở M365 Admin Center.
 
+---
+
 #### Microsoft Billing Accounts (MCA)
 
 | # | Billing Account | Billing Account ID | Chứa gì |
 |---|---|---|---|
 | 1 | **Wecare Group Joint Stock Company** | `0e0c45d9-ca8d-5a38-3a11-2e028a0d4f39:4dd47361-7ed3-47bb-b66a-a868713759b6_2019-05-31` | MACC (Azure Consumption Commitment) |
 | 2 | **Công ty cổ phần Wecare Group** | `0e0c45d9-ca8d-5a88-3a11-2e028a0d4f39:0dd97e735-6a3b-4be8-b02a-72f02dbad05b_2019-05-31` | Azure consumption — 13 invoices |
-
-#### Tổng hợp billing T03/2026 (all sources)
-
-| Source | Account | Số tiền | Thẻ | Loại phiếu |
-|---|---|---|---|---|
-| Azure consumption | Công ty cổ phần Wecare Group | $1,160.87 | MC ****6249 (cty) | Bảng kê chi phí |
-| Google Workspace | Google | $471.26 | Visa ****6073 (Khôi) | ĐNTT hoàn tiền |
-| M365 licenses | wecare.com.vn | ~$121.00 | Thẻ Khôi | ĐNTT hoàn tiền |
 
 #### Azure Billing Profiles
 
@@ -47,13 +51,41 @@
 
 > Power BI: dùng **Azure Cost Management connector** (built-in) → Choose Scope = `Billing Profile Id` → nhập ID ở trên.
 
+---
 
+#### Tổng hợp billing T03/2026 (all sources)
+
+| Source | Account | Số tiền | Thẻ | Loại phiếu |
+|---|---|---|---|---|
+| Azure consumption | Công ty cổ phần Wecare Group | $1,160.87 | MC ****6249 (cty) | Bảng kê chi phí |
+| Google Workspace | Google | $471.26 | Visa ****6073 (Khôi) | ĐNTT hoàn tiền |
+| M365 licenses | wecare.com.vn | ~$119.00 | Thẻ Khôi | ĐNTT hoàn tiền |
+
+> 💡 M365 license cost cập nhật từ [License_Report_2026-03.md](file:///d:/_Antigravity/03_Personal/Billing%20Management/License_Report_2026-03.md): Power Apps ×3 ($60) + M365 Business Premium ×2 ($44) + Power Automate ×1 ($15) = **$119/tháng**.
+
+---
+
+#### M365 License Issues (từ License Report T03/2026)
+
+| # | Issue | Severity | Action |
+|---|---|---|---|
+| 1 | `O365_BUSINESS_PREMIUM` over-assigned (2/1) | 🔴 High | Mua thêm seat hoặc unassign 1 user |
+| 2 | `VIRTUAL_AGENT_USL` suspended nhưng 6 users assigned | 🟡 Medium | Unassign all users |
+| 3 | `Microsoft_365_Copilot` suspended nhưng 1 user assigned | 🟡 Medium | Unassign user |
+| 4 | `Microsoft_Teams_Exploratory_Dept` full 27/27 | 🟡 Medium | Sắp hết, cần upgrade hoặc mua thêm |
+
+> Chi tiết: xem [License_Report_2026-03.md](file:///d:/_Antigravity/03_Personal/Billing%20Management/License_Report_2026-03.md)
+
+---
 
 #### Tech Stack
 - **Power BI Desktop** — dashboard report
   - Built-in **Azure Cost Management connector** (2 Billing Profiles: `K7JM-MPGE-BG7-PGB`, `FEN6-Y2IZ-BG7-PGB`)
   - Tables loaded: Usage details, Budgets, Balance summary, Charges (bỏ RI tables)
-  - DAX Measures — KPIs, trends, drill-down
+  - DAX Measures — KPIs, trends, drill-down → xem [DAX_Measures.dax](file:///d:/_Antigravity/03_Personal/Billing%20Management/output/powerbi/DAX_Measures.dax)
+- **Python** — `openpyxl` script fill bảng kê chi phí Excel
+- **Azure Cost MCP** — query Azure cost data trực tiếp từ Antigravity
+- **Google Cloud Billing API** — lấy Google billing data tự động
 
 #### Azure Cost Management — Bảng dữ liệu trong Power BI
 
@@ -91,6 +123,8 @@
 
 > ⚠️ Key file `gcp-sa-key.json` nằm ở root folder — **KHÔNG commit lên git** (đã gitignored).
 
+---
+
 #### Quy trình hoạt động
 
 ```
@@ -103,6 +137,10 @@ CSV mẫu (template) → Antigravity đọc + fill data → Script ghi vào Exce
 4. **Output**: `Tech_Bảng kê chi phí_T{MM}.{YYYY}.xlsx` trong `output/`
 5. Anh lấy file output gởi Kế toán ✅
 
+Chi tiết workflow: xem [WORKFLOW.md](file:///d:/_Antigravity/03_Personal/Billing%20Management/WORKFLOW.md)
+
+---
+
 #### Cấu trúc thư mục
 
 ```
@@ -110,47 +148,87 @@ Billing Management/
 ├── templates/              # Template gốc — KHÔNG SỬA
 │   ├── Bảng kê chi phí.csv
 │   └── Bảng kê chi phí.xlsx
-├── invoices/               # Hóa đơn, invoice gốc
+├── invoices/               # Hóa đơn, invoice gốc (gitignored)
 │   ├── _upload/            # Anh bỏ file gốc vào đây → em đổi tên + move
-│   ├── T03.2026/           # {Service}_{InvoiceID}.pdf
-│   └── T04.2026/
+│   ├── T02.2026/           # Azure_G139815737.pdf, Google_A42739892333079485.htm
+│   └── T03.2026/           # Azure_G145113496.pdf
 ├── output/                 # File đã fill → gởi KT
-│   └── powerbi/            # Power BI data package + API reference
-├── reference/              # Tài liệu tham khảo, kết quả điều tra chi phí
-│   └── gemini_api_audit.md # Điều tra Gemini API cost spike T03/2026
+│   ├── powerbi/            # Power BI data package (8 files)
+│   │   ├── README.md       # API reference chi tiết (Azure, Google, M365)
+│   │   ├── DAX_Measures.dax
+│   │   ├── Wecare_Billing.json    # Power BI theme
+│   │   ├── Azure_Resources.csv    # Sample data
+│   │   ├── Azure_Services.csv
+│   │   ├── Monthly_Billing.csv
+│   │   ├── Licenses.csv
+│   │   └── Services.csv
+│   ├── Email_MS_Support_MOSA_to_MCA.md
+│   ├── Reply_MS_Support_20260318.md
+│   ├── Reply_MS_Support_20260319.md
+│   ├── PowerBI_Draft.html          # UI draft cho Power BI report
+│   ├── chart-palette.css
+│   ├── report-theme.css
+│   └── Tech_Bảng kê chi phí_T02.2026.xlsx
+├── reference/              # Tài liệu tham khảo, kết quả điều tra
+│   ├── gemini_api_audit.md         # Điều tra Gemini API cost spike T03/2026
+│   └── MS_Support_Case_2603170030007503.md  # Full email thread MS Support
 ├── scripts/
-│   └── fill_expense.py
+│   └── fill_expense.py     # Script fill bảng kê chi phí (openpyxl)
+├── License_Report_2026-03.md  # Audit M365/PP licenses — $119/tháng
 ├── PROJECT.md
-└── WORKFLOW.md
+├── WORKFLOW.md
+├── gcp-sa-key.json         # 🔒 GCP Service Account key (gitignored)
+└── .gitignore
 ```
 
 #### Naming Convention
 ```
+# File output:
 Tech_Bảng kê chi phí_T{tháng}.{năm}.xlsx
+
+# Invoice files (trong invoices/T{MM}.{YYYY}/):
+{Service}_{InvoiceID}.pdf|htm
 ```
 
+---
 
-
-#### Known Issues
-- Thẻ cty dùng chung Sale/Marketing → risk hết hạn mức khi billing cycle đến
-- T01/2026 đã trừ thẻ Khôi ($362.11 Azure) → cần xác nhận đã hoàn tiền chưa
-- wecare.com.vn (MOSA) đang charge M365 licenses vào thẻ Khôi → cần đổi thẻ hoặc migrate
-
-#### MS Support Case — MOSA to MCA Migration
+#### MS Support Case — MOSA to MCA Migration — ✅ RESOLVED
 
 | Field | Value |
 |---|---|
 | **Ticket #** | `2603170030007503` |
 | **Opened** | 2026-03-17 |
-| **Status** | Agent Assigned — Anthony A |
-| **Email thread** | [Email_MS_Support_MOSA_to_MCA.md](file:///d:/_Antigravity/03_Personal/Billing%20Management/output/Email_MS_Support_MOSA_to_MCA.md) |
+| **Resolved** | 2026-03-26 |
+| **Resolution** | MOSA licenses đã hủy, chuyển hoàn toàn qua billing account MCA |
+| **Full thread** | [MS_Support_Case_2603170030007503.md](file:///d:/_Antigravity/03_Personal/Billing%20Management/reference/MS_Support_Case_2603170030007503.md) |
 
-**MS Support hướng dẫn 3 bước:**
-1. Xác nhận roles (Billing Admin cho MOSA, Owner/Contributor cho MCA)
-2. Đổi payment method MOSA → thêm MC ****6249 → replace thẻ Khôi
-3. Consolidate: mua licenses trên MCA → move users → cancel MOSA
+**Kết quả thực hiện:**
+- ✅ Step 1: Xác nhận roles — Global Admin + Billing Admin
+- ✅ Step 2: ~~Đổi payment method~~ → Hủy luôn MOSA licenses
+- ✅ Step 3: Chuyển hoàn toàn qua MCA — không cần mua lại (đã hủy MOSA)
 
-> ⚠️ Anthony đã gọi 18/03 nhưng rơi voicemail → cần **reply email** xác nhận vẫn cần hỗ trợ.
+---
+
+#### Known Issues
+- Thẻ cty MC ****6249 dùng chung Sale/Marketing → risk hết hạn mức khi billing cycle đến
+- T01/2026 đã trừ thẻ Khôi ($362.11 Azure) → **cần xác nhận đã hoàn tiền chưa**
+- ~~wecare.com.vn (MOSA) đang charge M365 licenses vào thẻ Khôi~~ → **ĐÃ HỦY MOSA** (2026-03-26)
+- ~~`O365_BUSINESS_PREMIUM` over-assigned 2/1 seats~~ → MOSA đã hủy, không còn issue
+- 6 users vẫn assigned trên `VIRTUAL_AGENT_USL` (suspended) → cần cleanup trên Admin Center
+- 1 user vẫn assigned trên `Microsoft_365_Copilot` (suspended) → cần cleanup trên Admin Center
+
+#### ⚠️ Cleanup Suspended Licenses
+
+Cần thao tác trên **M365 Admin Center** → Users → Active users → chọn user → Licenses and apps → uncheck SKU.
+
+| SKU | Users cần unassign | Cách tìm |
+|---|---|---|
+| `VIRTUAL_AGENT_USL` | 6 users | Admin Center → Billing → Licenses → filter "Copilot Studio" |
+| `Microsoft_365_Copilot` | 1 user | Admin Center → Billing → Licenses → filter "Copilot" |
+
+> 💡 Không ảnh hưởng service vì SKU đã suspended — chỉ cleanup cho sạch.
+
+---
 
 #### Roadmap
 
@@ -158,32 +236,72 @@ Tech_Bảng kê chi phí_T{tháng}.{năm}.xlsx
 - [x] Setup cấu trúc thư mục (templates/, invoices/, output/, scripts/, _upload/)
 - [x] Tạo WORKFLOW.md, PROJECT.md, fill_expense.py
 - [x] Đưa file Excel + CSV template vào templates/
-- [x] Ghi nhận 4 Microsoft billing accounts + IDs
+- [x] Ghi nhận Microsoft billing accounts + IDs
 - [x] Xử lý invoice upload T02 + T03 (Azure + Google)
-- [x] Điều tra Gemini API cost spike T03/2026 → ghi nhận vào `reference/gemini_api_audit.md`
-- [x] Gửi ticket MS Support MOSA → MCA migration (TrackingID#2603170030007503)
-- [x] Tổng hợp phản hồi MS Support → `output/Email_MS_Support_MOSA_to_MCA.md`
+- [x] Điều tra Gemini API cost spike T03/2026 → `reference/gemini_api_audit.md`
+- [x] Gửi ticket MS Support MOSA → MCA migration (#2603170030007503)
+- [x] Tổng hợp toàn bộ email thread MS Support → `reference/MS_Support_Case_2603170030007503.md`
+- [x] Azure Cost MCP hoạt động (2026-03-24)
+- [x] Setup Google Cloud Billing API — SA + role assigned (2026-03-25)
+- [x] Bổ sung API Reference + Power BI data package vào `output/powerbi/` (2026-03-25)
+- [x] Setup Power BI Azure Cost Management connector (2026-03-25)
+- [x] License audit T03/2026 → `License_Report_2026-03.md` — $119/tháng (2026-03-17)
+- [x] **HỦY MOSA licenses** — chuyển hoàn toàn qua MCA billing account (2026-03-26)
 
 **🔥 Ưu tiên cao — Làm tiếp:**
-- [ ] **Reply Anthony** — xác nhận vẫn cần hỗ trợ, hỏi chi tiết Step 3
-- [ ] **Bật Advanced Diagnostics** theo yêu cầu MS Support
-- [ ] Đổi thẻ thanh toán wecare.com.vn: thẻ Khôi → thẻ cty MC ****6249 (Step 2 từ MS)
-- [ ] Download lại Google receipt T03 ($471.26) → bỏ vào `_upload/` (file cũ bị mất do Windows long path)
-- [ ] Fill bảng kê chi phí T03/2026 — Azure $1,160.87 (thẻ cty)
-- [ ] Lập ĐNTT hoàn tiền T03 cho Khôi — Google $471.26 + M365 ~$121.00
+- [ ] **Fill bảng kê chi phí T03/2026** — chờ hết tháng, lấy invoice chính thức
+- [ ] **Cleanup suspended licenses** — unassign 7 users (VIRTUAL_AGENT_USL + Copilot) trên Admin Center
 
-**📋 Cần xác nhận:**
+**📋 Nhắc nhở (low priority):**
+- [ ] Lập ĐNTT hoàn tiền T03 cho Khôi — Google $471.26 + M365 $119
 - [ ] T01/2026 Azure $362.11 trừ thẻ Khôi — đã hoàn tiền chưa?
-- [ ] Xác nhận chi tiết từng khoản M365 license (download CSV từ wecare.com.vn)
-- [ ] Lên plan chi tiết migrate MOSA → MCA (Step 3 từ MS Support)
 
-**🔮 Tương lai:**
-- [x] ~~Build MCP / Skill lấy billing data tự động từ Azure~~ → Azure Cost MCP hoạt động ✅ (2026-03-24)
-- [x] Setup Google Cloud Billing API → Service account + role assigned ✅ (2026-03-25)
-- [x] Bổ sung API Reference chi tiết (Azure, Google, M365) vào `output/powerbi/README.md` ✅ (2026-03-25)
-- [x] Setup Power BI Azure Cost Management connector (Billing Profile `K7JM-MPGE-BG7-PGB`) ✅ (2026-03-25)
+**🚀 Dashboard Roadmap — Power BI Billing Dashboard**
+
+> **Mục tiêu**: Build Power BI dashboard để team R&D theo dõi chi phí cloud realtime, phát hiện bất thường, và lập kế hoạch ngân sách.
+> **Tool**: Power BI Desktop + Azure Cost Management connector (built-in) + Google Cloud Billing API
+
+**Phase 1 — Azure Dashboard (ưu tiên) `output/powerbi/`**
+- [ ] **KPI Strip (highlight numbers)**:
+  - Total Spend MTD (so sánh vs tháng trước)
+  - Forecast End-of-Month (dự báo)
+  - Budget Remaining (% đã dùng)
+  - Top Service Cost (dịch vụ tốn nhất)
+  - MoM Change % (tăng/giảm so tháng trước)
+- [ ] **Charts**:
+  - 📊 Daily Cost Trend (line chart) — theo dõi spending pattern theo ngày
+  - 📊 Cost by Service (bar chart) — Fabric, VMs, Storage, VNet, Bandwidth
+  - 📊 Cost by Resource Group (treemap) — wecare, hr, ecommerce, ai-dev
+  - 📊 Top 10 Resources (horizontal bar) — resource nào tốn nhất
+  - 📊 Month-over-Month Comparison (clustered bar) — so sánh 3-6 tháng gần nhất
+- [ ] **Insights**:
+  - ⚠️ Anomaly detection — highlight ngày có cost spike > 20% trung bình
+  - 💡 Idle resource detection — VM/disk chạy nhưng cost thấp bất thường
+  - 📈 Forecast trendline — dự báo cost cuối tháng dựa trên pattern hiện tại
+- [ ] **Data source**: Azure Cost Management connector → Billing Profile `K7JM-MPGE-BG7-PGB`
+- [ ] **DAX Measures**: xem [DAX_Measures.dax](file:///d:/_Antigravity/03_Personal/Billing%20Management/output/powerbi/DAX_Measures.dax)
+
+**Phase 2 — Google Cloud Billing**
 - [ ] Build MCP Google Billing cost (dùng `studio-key` SA)
-- [ ] Setup BigQuery export cho Google Cloud → Power BI BigQuery connector
-- [ ] Theo dõi hạn mức thẻ cty hàng tháng
-- [ ] Power BI report → publish lên Power BI Service → share team R&D
+- [ ] Setup BigQuery export → Power BI BigQuery connector
+- [ ] Thêm page Google cost vào cùng report — so sánh Azure vs Google
+- [ ] Charts: Google cost by project, by service, monthly trend
 
+**Phase 3 — Publish & Automate**
+- [ ] Publish lên Power BI Service → share team R&D
+- [ ] Schedule refresh (daily) cho Azure + Google data
+- [ ] Setup alerts: notify khi cost vượt ngưỡng budget
+- [ ] Theo dõi hạn mức thẻ cty hàng tháng
+- [ ] Tự động hóa fill bảng kê — Antigravity trigger hàng tháng
+
+---
+
+#### Quyết Định Thiết Kế
+
+- **Power BI Desktop + built-in connector**: dùng Azure Cost Management connector có sẵn trong Power BI thay vì tự build REST API → ít maintenance, auto-refresh, Microsoft supported.
+- **Dùng openpyxl ghi trực tiếp vào Excel template** thay vì export CSV rồi convert: vì template có merged cells phức tạp (27 sheets), cần giữ format gốc.
+- **Gitignore invoices/ và output/*.xlsx**: chứa thông tin billing nhạy cảm, không commit lên repo.
+- **Tách MS Support email thread ra `reference/`**: giữ full context để tra cứu, không gom vào PROJECT.md.
+- **Power BI data package (`output/powerbi/`)**: chứa sample data + DAX measures + theme — portable, ai clone repo cũng setup được Power BI report.
+- **Không dùng Microsoft Graph API cho billing**: Graph API không expose billing/cost data → dùng Azure Cost Management API (REST) + M365 Admin Center manual.
+- **Hủy MOSA thay vì migrate**: MS Support xác nhận không có cách transfer trực tiếp MOSA → MCA → quyết định hủy MOSA và chuyển hẳn qua MCA (2026-03-26).
