@@ -197,19 +197,19 @@ const FALLBACK = {
       "m": "T01",
       "az": 433.1,
       "gg": 0,
-      "ms": 0
+      "ms": 104.75
     },
     {
       "m": "T02",
       "az": 1055.25,
       "gg": 0,
-      "ms": 0
+      "ms": 119
     },
     {
       "m": "T03",
-      "az": 1102.66,
+      "az": 1106.68,
       "gg": 471.26,
-      "ms": 0
+      "ms": 140.55
     }
   ],
   "daily": [
@@ -239,33 +239,38 @@ const FALLBACK = {
     52.89,
     33.53,
     33.26,
-    6.7
+    10.72
   ],
   "resources": [
     {
       "n": "wecaredb",
       "t": "capacities",
-      "c": 825.45
+      "c": 828.98
     },
     {
       "n": "ecommerce",
       "t": "virtualmachines",
-      "c": 120.36
+      "c": 120.55
     },
     {
       "n": "wecare-ai-dev",
       "t": "virtualmachines",
-      "c": 60.19
+      "c": 60.28
     },
     {
       "n": "hr-vm",
       "t": "virtualmachines",
-      "c": 45.77
+      "c": 45.84
     },
     {
       "n": "hr-vm_osdisk_1_3b10a6c442464e5495a220cfacdcf928",
       "t": "disks",
-      "c": 16.64
+      "c": 16.69
+    },
+    {
+      "n": "ecommerce_osdisk_1_24e7b3d407444c02a7b8a24f11e46c88",
+      "t": "disks",
+      "c": 4.47
     },
     {
       "n": "wecare-ai-dev_osdisk_1_0f2d926e95254c998573b3c8939c0f99",
@@ -273,24 +278,19 @@ const FALLBACK = {
       "c": 4.46
     },
     {
-      "n": "ecommerce_osdisk_1_24e7b3d407444c02a7b8a24f11e46c88",
-      "t": "disks",
-      "c": 4.46
+      "n": "hr-vm-ip",
+      "t": "publicipaddresses",
+      "c": 3.15
+    },
+    {
+      "n": "dev-ip",
+      "t": "publicipaddresses",
+      "c": 3.15
     },
     {
       "n": "dev.ecommerce-ip",
       "t": "publicipaddresses",
       "c": 3.15
-    },
-    {
-      "n": "myvm-vnet-ip",
-      "t": "publicipaddresses",
-      "c": 3.15
-    },
-    {
-      "n": "hr-vm-ip",
-      "t": "publicipaddresses",
-      "c": 3.14
     }
   ],
   "services": [
@@ -298,29 +298,29 @@ const FALLBACK = {
       "name": "Microsoft Fabric",
       "t01": 104.36,
       "t02": 755.52,
-      "t03": 825.45,
-      "total": 1685.33
+      "t03": 828.98,
+      "total": 1688.8600000000001
     },
     {
       "name": "Virtual Machines",
       "t01": 268.53,
       "t02": 242.46,
-      "t03": 226.3,
-      "total": 737.29
+      "t03": 226.66,
+      "total": 737.65
     },
     {
       "name": "Storage",
       "t01": 30.39,
       "t02": 30.34,
-      "t03": 25.66,
-      "total": 86.39
+      "t03": 25.74,
+      "total": 86.47
     },
     {
       "name": "Virtual Network",
       "t01": 29.76,
       "t02": 26.88,
-      "t03": 25.13,
-      "total": 81.77
+      "t03": 25.19,
+      "total": 81.83
     },
     {
       "name": "Foundry Models",
@@ -349,8 +349,34 @@ const FALLBACK = {
     "total": 471.26
   },
   "m365": {
-    "total": 0,
-    "items": []
+    "total": 140.55,
+    "items": [
+      {
+        "name": "Microsoft Teams Premium",
+        "cost": 104.75,
+        "color": "#118DFF"
+      },
+      {
+        "name": "Power BI Premium Per User",
+        "cost": 100.8,
+        "color": "#12239E"
+      },
+      {
+        "name": "Power Apps Premium",
+        "cost": 24,
+        "color": "#E66C37"
+      },
+      {
+        "name": "Power Automate Premium",
+        "cost": 15.75,
+        "color": "#6B007B"
+      },
+      {
+        "name": "Microsoft Copilot Studio User License",
+        "cost": 0,
+        "color": "#118DFF"
+      }
+    ]
   }
 };
 

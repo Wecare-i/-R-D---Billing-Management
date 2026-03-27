@@ -22,9 +22,28 @@ const SCOPE = 'https://management.azure.com/.default';
 const BASE_URL = 'https://management.azure.com';
 const API_VERSION = '2023-11-01';
 
-// M365 billing profile (MACC account)
-const M365_BILLING_ACCOUNT = process.env.AZURE_BILLING_ACCOUNT_1_ID;
-const M365_BILLING_PROFILE = process.env.AZURE_BILLING_PROFILE_1_ID;
+// Billing profiles — 2 accounts
+const BILLING_PROFILES = [
+  { // Account 1: Wecare Group Joint Stock Company (MACC/M365)
+    account: process.env.AZURE_BILLING_ACCOUNT_1_ID,
+    profile: process.env.AZURE_BILLING_PROFILE_1_ID
+  },
+  { // Account 2: Công ty cổ phần Wecare Group (Azure consumption)
+    account: process.env.AZURE_BILLING_ACCOUNT_2_ID,
+    profile: process.env.AZURE_BILLING_PROFILE_2_ID
+  }
+].filter(p => p.account && p.profile);
+
+// M365 fallback data (khi billing API fail)
+const M365_FALLBACK = {
+  total: 119,
+  items: [
+    { name: 'Power Apps per app plan', cost: 60, color: '#118DFF' },
+    { name: 'Microsoft 365 Business Premium', cost: 44, color: '#12239E' },
+    { name: 'Power Automate per user plan', cost: 15, color: '#E66C37' }
+  ],
+  byMonth: { T01: 119, T02: 119, T03: 119 }
+};
 
 // ─── Auth ───────────────────────────────────────────────────
 async function getToken() {
@@ -125,24 +144,30 @@ async function fetchForecast(token) {
 }
 
 async function fetchM365Costs(token) {
-  if (!M365_BILLING_ACCOUNT || !M365_BILLING_PROFILE) return [];
-  const scope = `providers/Microsoft.Billing/billingAccounts/${M365_BILLING_ACCOUNT}/billingProfiles/${M365_BILLING_PROFILE}`;
   const year = new Date().getFullYear();
-  try {
-    return await costQuery(token, 'query', {
-      type: 'ActualCost',
-      timeframe: 'Custom',
-      timePeriod: { from: `${year}-01-01`, to: `${year}-12-31` },
-      dataset: {
-        granularity: 'Monthly',
-        aggregation: { totalCost: { name: 'CostUSD', function: 'Sum' } },
-        grouping: [{ type: 'Dimension', name: 'ProductOrderName' }]
-      }
-    }, scope);
-  } catch (err) {
-    console.warn('⚠️ M365 billing error:', err.message);
-    return [];
+  const allRows = [];
+
+  for (const bp of BILLING_PROFILES) {
+    const scope = `providers/Microsoft.Billing/billingAccounts/${bp.account}/billingProfiles/${bp.profile}`;
+    try {
+      const rows = await costQuery(token, 'query', {
+        type: 'ActualCost',
+        timeframe: 'Custom',
+        timePeriod: { from: `${year}-01-01`, to: `${year}-12-31` },
+        dataset: {
+          granularity: 'Monthly',
+          aggregation: { totalCost: { name: 'CostUSD', function: 'Sum' } },
+          grouping: [{ type: 'Dimension', name: 'ProductOrderName' }]
+        }
+      }, scope);
+      console.log(`   ✅ Billing profile ${bp.profile}: ${rows.length} rows`);
+      allRows.push(...rows);
+    } catch (err) {
+      console.warn(`   ⚠️ Billing profile ${bp.profile}: ${err.message.substring(0, 80)}`);
+    }
   }
+
+  return allRows;
 }
 
 // ─── Data Processing ────────────────────────────────────────
@@ -236,7 +261,9 @@ async function main() {
   const byMonth = processMonthly(monthlyRows);
   const daily = processDaily(dailyRows);
   const resources = processResources(resourceRows);
-  const m365 = processM365(m365Rows);
+  const m365 = m365Rows.length > 0 ? processM365(m365Rows) : M365_FALLBACK;
+  const m365Source = m365Rows.length > 0 ? 'API' : 'Fallback';
+  console.log(`   M365 source: ${m365Source} (total: $${m365.total})`);
 
   // Build monthly array
   const months = Object.keys(byMonth).sort();
@@ -244,7 +271,7 @@ async function main() {
     m,
     az: Math.round(byMonth[m].total * 100) / 100,
     gg: m === 'T03' ? 471.26 : 0, // Google: manual (no REST API)
-    ms: m365.byMonth[m] ? Math.round(m365.byMonth[m] * 100) / 100 : 0
+    ms: m365.byMonth[m] ? Math.round(m365.byMonth[m] * 100) / 100 : 119
   }));
 
   // Build services array (Q1 breakdown)
