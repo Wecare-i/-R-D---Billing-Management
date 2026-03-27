@@ -1,6 +1,6 @@
 # Node
 node_modules/
-package-lock.json
+
 
 # Credentials - SENSITIVE
 gcp-sa-key.json
