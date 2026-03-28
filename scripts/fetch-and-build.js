@@ -61,7 +61,7 @@ const M365_FALLBACK = {
 
 // Google fallback (khi chưa setup budget)
 const GOOGLE_FALLBACK = {
-  workspace: 0, aiStudio: 0, total: 0,
+  items: [], total: 0,
   byMonth: {}, source: 'fallback'
 };
 
@@ -267,7 +267,7 @@ async function fetchGoogleBilling() {
           return sum + parseFloat(b.amount?.specifiedAmount?.units || '0');
         }, 0);
         if (totalSpend > 0) {
-          return { workspace: 0, aiStudio: 0, total: totalSpend, byMonth: {}, source: 'budget-api' };
+          return { items: [], total: totalSpend, byMonth: {}, source: 'budget-api' };
         }
       }
     }
@@ -423,8 +423,7 @@ async function main() {
       m365: m365.total
     } : null,
     google: {
-      workspace: googleData.workspace ?? GOOGLE_FALLBACK.workspace,
-      aiStudio: googleData.aiStudio ?? GOOGLE_FALLBACK.aiStudio,
+      items: googleData.items || [],
       total: googleData.total,
       source: googleData.source || 'api'
     },

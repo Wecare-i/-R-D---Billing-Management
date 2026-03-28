@@ -14,7 +14,7 @@
     },
     {
       "m": "T03",
-      "az": 1124.04,
+      "az": 1124.28,
       "gg": 0,
       "ms": 140.55
     }
@@ -46,13 +46,13 @@
     52.89,
     33.53,
     33.26,
-    28.08
+    28.32
   ],
   "resources": [
     {
       "n": "wecaredb",
       "t": "capacities",
-      "c": 839.3
+      "c": 839.31
     },
     {
       "n": "ecommerce",
@@ -62,22 +62,22 @@
     {
       "n": "wecare-ai-dev",
       "t": "virtualmachines",
-      "c": 61.82
+      "c": 61.91
     },
     {
       "n": "hr-vm",
       "t": "virtualmachines",
-      "c": 47.01
+      "c": 47.08
     },
     {
       "n": "hr-vm_osdisk_1_3b10a6c442464e5495a220cfacdcf928",
       "t": "disks",
-      "c": 17.11
+      "c": 17.14
     },
     {
       "n": "wecare-ai-dev_osdisk_1_0f2d926e95254c998573b3c8939c0f99",
       "t": "disks",
-      "c": 4.58
+      "c": 4.59
     },
     {
       "n": "ecommerce_osdisk_1_24e7b3d407444c02a7b8a24f11e46c88",
@@ -85,12 +85,12 @@
       "c": 4.58
     },
     {
-      "n": "dev-ip",
+      "n": "ecommerce-ip",
       "t": "publicipaddresses",
-      "c": 3.23
+      "c": 3.24
     },
     {
-      "n": "ecommerce-ip",
+      "n": "hr-vm-ip",
       "t": "publicipaddresses",
       "c": 3.23
     },
@@ -105,29 +105,29 @@
       "name": "Microsoft Fabric",
       "t01": 104.36,
       "t02": 755.52,
-      "t03": 839.3,
-      "total": 1699.1799999999998
+      "t03": 839.31,
+      "total": 1699.19
     },
     {
       "name": "Virtual Machines",
       "t01": 268.53,
       "t02": 242.46,
-      "t03": 232.43,
-      "total": 743.4200000000001
+      "t03": 232.6,
+      "total": 743.59
     },
     {
       "name": "Storage",
       "t01": 30.39,
       "t02": 30.34,
-      "t03": 26.39,
-      "total": 87.12
+      "t03": 26.43,
+      "total": 87.16
     },
     {
       "name": "Virtual Network",
       "t01": 29.76,
       "t02": 26.88,
-      "t03": 25.81,
-      "total": 82.45
+      "t03": 25.84,
+      "total": 82.48
     },
     {
       "name": "Foundry Models",
@@ -156,8 +156,7 @@
     "m365": 140.55
   },
   "google": {
-    "workspace": 0,
-    "aiStudio": 0,
+    "items": [],
     "total": 0,
     "source": "authenticated-fallback"
   },
@@ -187,5 +186,5 @@
     ]
   },
   "buildMonth": "T03",
-  "buildTime": "28/03/2026 10:49 ICT"
+  "buildTime": "28/03/2026 11:45 ICT"
 }

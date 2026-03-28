@@ -268,6 +268,13 @@ Cần thao tác trên **M365 Admin Center** → Users → Active users → chọ
   - Multi-vendor support: Azure services, Google Workspace/AI Studio, M365 licenses
   - GitHub Pages deploy via Actions workflow
 - [x] **Migrate deploy** — từ static HTML sang React dashboard trên GitHub Pages (2026-03-27)
+- [x] **Tối ưu Dashboard & Data Pipeline** (2026-03-28)
+  - Fix lỗi `ReferenceError: now is not defined` gây crash script Node.js.
+  - Loại bỏ hoàn toàn data ảo (hardcoded ~$471) của Google Cloud, kích hoạt cảnh báo "Chưa có data từ Google API / Setup Budget" cho tới khi thực sự cấu hình Budget.
+  - Refactor data model của Google thành mảng động (`data.google.items`) để sẵn sàng rải (drill-down) data dịch vụ thật nếu đấu nối BigQuery sau này.
+  - Sửa logic biểu đồ Daily Cost: Tự động ẩn biểu đồ đường day-by-day (hiển thị chú thích cảnh báo) khi chọn các Vendor tính phí Subscription phẳng (Google/M365) để tránh gây hiểu lầm. Đồng thời Title tự động cập nhật linh hoạt theo tháng được chọn.
+  - Cân đối tỷ lệ dữ liệu (Scale Proportional) cho M365 Card ở cả 3 tháng lịch sử (T01, T02, T03) thay vì clone số liệu của tháng hiện tại xuống.
+  - Căn lề trái thẩm mỹ cho `ResourceBars` của Azure, thêm thuộc tính tooltip đọc Full name các Server bị dài.
 
 **🔥 Ưu tiên cao — Làm tiếp:**
 - [ ] **Fill bảng kê chi phí T03/2026** — chờ hết tháng, lấy invoice chính thức

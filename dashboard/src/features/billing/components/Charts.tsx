@@ -57,10 +57,12 @@ export function Charts({ data, selectedMonth, vendor }: Props) {
     }));
   } else if (vendor === 'google') {
     barTitle = 'Google — Monthly Breakdown';
-    barDatasets = [
-      { label: 'Workspace', data: data.monthly.map(() => data.google.workspace), backgroundColor: CLR.tertiary, borderRadius: 4, borderSkipped: false },
-      { label: 'AI Studio', data: data.monthly.map(() => data.google.aiStudio), backgroundColor: '#FF9F40', borderRadius: 4, borderSkipped: false },
-    ];
+    barDatasets = data.google.items.map((item, i) => ({
+      label: item.name,
+      data: data.monthly.map(() => item.cost),
+      backgroundColor: palette[(i + 2) % palette.length],
+      borderRadius: 4, borderSkipped: false,
+    }));
   } else if (vendor === 'm365') {
     barTitle = 'M365 — License Costs';
     barDatasets = data.m365.items.map((item, i) => ({
@@ -87,10 +89,11 @@ export function Charts({ data, selectedMonth, vendor }: Props) {
       return { label: `${s.name} $${Math.round(cost)}`, value: cost, color: palette[i % palette.length] };
     }).filter((e) => e.value > 0);
   } else if (vendor === 'google') {
-    donutEntries = [
-      { label: `Workspace $${Math.round(data.google.workspace)}`, value: data.google.workspace, color: CLR.tertiary },
-      { label: `AI Studio $${Math.round(data.google.aiStudio)}`, value: data.google.aiStudio, color: '#FF9F40' },
-    ];
+    donutEntries = data.google.items.map((item, i) => ({
+      label: `${item.name} $${Math.round(item.cost)}`, 
+      value: item.cost, 
+      color: palette[(i + 2) % palette.length]
+    }));
   } else if (vendor === 'm365') {
     donutEntries = data.m365.items.map((item, i) => ({
       label: `${item.name} $${item.cost}`, value: item.cost, color: palette[i % palette.length],

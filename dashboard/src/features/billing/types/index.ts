@@ -26,8 +26,7 @@ export interface M365Item {
 }
 
 export interface GoogleData {
-  workspace: number;
-  aiStudio: number;
+  items: { name: string; cost: number; }[];
   total: number;
   source?: string;
 }

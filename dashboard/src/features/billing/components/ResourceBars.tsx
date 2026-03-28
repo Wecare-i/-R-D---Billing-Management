@@ -42,12 +42,14 @@ export function ResourceBars({ data, vendor, selectedMonth }: Props) {
     }
   }
 
-  // Google: monthly subscription, scale theo numMonths khi 'all'
+  // Google: scale dynamic items theo numMonths khi 'all'
   if (vendor === 'all' || vendor === 'google') {
-    items.push(
-      { name: 'Workspace', cost: Math.round(data.google.workspace * numMonths * 100) / 100, color: '#E66C37', vendor: 'Google' },
-      { name: 'AI Studio', cost: Math.round(data.google.aiStudio * numMonths * 100) / 100, color: '#FF9F40', vendor: 'Google' },
-    );
+    items.push(...data.google.items.map(item => ({
+      name: item.name, 
+      cost: Math.round(item.cost * numMonths * 100) / 100, 
+      color: '#E66C37', 
+      vendor: 'Google' 
+    })));
   }
 
   // M365: scale items về selected month total

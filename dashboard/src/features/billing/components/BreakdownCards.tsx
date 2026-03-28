@@ -88,17 +88,15 @@ export function BreakdownCards({ data, selectedMonth, showAzure, showGoogle, sho
                 <span className="text-xs font-medium text-center">Chưa có data từ Google API</span>
                 <span className="text-[10px] opacity-60 text-center px-4">Setup Budget trên GCP Console để theo dõi chi phí</span>
               </div>
-            ) : (
-              [
-                { name: 'Workspace', cost: selectedMonth === 'all' ? data.google.workspace * data.monthly.length : data.google.workspace },
-                { name: 'AI Studio', cost: selectedMonth === 'all' ? data.google.aiStudio * data.monthly.length : data.google.aiStudio },
-              ].map((item) => {
-                const pct = googleTotal > 0 ? Math.round((item.cost / googleTotal) * 100) : 0;
+            ) : data.google.items.length > 0 ? (
+              data.google.items.map((item) => {
+                const itemCost = selectedMonth === 'all' ? item.cost * data.monthly.length : item.cost;
+                const pct = googleTotal > 0 ? Math.round((itemCost / googleTotal) * 100) : 0;
                 return (
                   <div key={item.name}>
                     <div className="flex justify-between items-end">
                       <span className="text-xs text-on-surface-variant font-medium">{item.name}</span>
-                      <span className="text-sm font-bold tabular-nums">{usd(item.cost)}</span>
+                      <span className="text-sm font-bold tabular-nums">{usd(itemCost)}</span>
                     </div>
                     <div className="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden mt-1">
                       <div className="bg-tertiary h-full transition-all duration-700" style={{ width: `${pct}%`, opacity: Math.max(0.3, pct / 100) }} />
@@ -106,6 +104,16 @@ export function BreakdownCards({ data, selectedMonth, showAzure, showGoogle, sho
                   </div>
                 );
               })
+            ) : (
+              <div>
+                <div className="flex justify-between items-end">
+                  <span className="text-xs text-on-surface-variant font-medium">Tổng chi phí (Chưa có BigQuery Breakdown)</span>
+                  <span className="text-sm font-bold tabular-nums">{usd(googleTotal)}</span>
+                </div>
+                <div className="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden mt-1">
+                  <div className="bg-tertiary h-full transition-all duration-700" style={{ width: '100%', opacity: 1 }} />
+                </div>
+              </div>
             )}
           </div>
         </div>
