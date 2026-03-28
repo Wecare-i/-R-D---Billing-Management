@@ -43,7 +43,8 @@ export function Charts({ data, selectedMonth, vendor }: Props) {
   if (vendor === 'all') {
     barDatasets = [
       showAz && { label: 'Azure', data: data.monthly.map((x) => x.az), backgroundColor: CLR.primary, borderRadius: 4, borderSkipped: false as const },
-      showGg && { label: 'Google', data: data.monthly.map((x) => x.gg), backgroundColor: CLR.tertiary, borderRadius: 4, borderSkipped: false as const },
+      // Google: monthly subscription — dùng google.total vì monthly.gg không có byMonth
+      showGg && { label: 'Google', data: data.monthly.map(() => data.google.total), backgroundColor: CLR.tertiary, borderRadius: 4, borderSkipped: false as const },
       showMs && { label: 'M365', data: data.monthly.map((x) => x.ms), backgroundColor: CLR.secondary, borderRadius: 4, borderSkipped: false as const },
     ].filter(Boolean);
   } else if (vendor === 'azure') {
@@ -76,7 +77,8 @@ export function Charts({ data, selectedMonth, vendor }: Props) {
   if (vendor === 'all') {
     donutEntries = [
       { label: `Azure $${Math.round(latest.az)}`, value: latest.az, color: CLR.primary },
-      { label: `Google $${Math.round(latest.gg)}`, value: latest.gg, color: CLR.tertiary },
+      // Dùng google.total vì latest.gg = 0 (không có GCP byMonth data)
+      { label: `Google $${Math.round(data.google.total)}`, value: data.google.total, color: CLR.tertiary },
       { label: `M365 $${Math.round(latest.ms)}`, value: latest.ms, color: CLR.purple },
     ];
   } else if (vendor === 'azure') {
@@ -154,32 +156,48 @@ export function Charts({ data, selectedMonth, vendor }: Props) {
       {/* Daily Cost Line */}
       <div className="card p-6 flex flex-col gap-4">
         <div className="flex justify-between items-center">
-          <h4 className="text-sm font-bold uppercase tracking-widest text-on-surface-variant">Daily Cost — {latest.m}/2026</h4>
+          <h4 className="text-sm font-bold uppercase tracking-widest text-on-surface-variant">
+            Daily Cost — {selectedMonth === 'all' ? 'Q1' : selectedMonth}/2026
+          </h4>
           <div className="flex items-center gap-2 text-[10px] font-bold text-green-400 bg-green-400/10 px-2 py-1 rounded">
             <span className="w-1.5 h-1.5 rounded-full bg-green-400 pulse-dot" />
             <span>LIVE DATA</span>
           </div>
         </div>
         <div className="flex-1 flex items-center">
-          <Line
-            data={{
-              labels: data.daily.map((_, i) => String(i + 1).padStart(2, '0')),
-              datasets: [{
-                label: 'Daily Cost', data: data.daily,
-                borderColor: CLR.primary, backgroundColor: CLR.primary + '18',
-                fill: true, tension: 0.3, pointRadius: 2.5,
-                pointBackgroundColor: CLR.primary, borderWidth: 2.5,
-              }],
-            }}
-            options={{
-              ...BASE,
-              plugins: { legend: { display: false } },
-              scales: {
-                x: { grid: { display: false }, ticks: { font: { size: 9 } } },
-                y: { beginAtZero: true, ticks: { callback: (v) => '$' + v } },
-              },
-            }}
-          />
+          {vendor === 'google' || vendor === 'm365' ? (
+            <div className="w-full flex flex-col items-center justify-center gap-2 py-8 text-on-surface-variant">
+              <span className="text-2xl">⚡</span>
+              <span className="text-sm font-medium">Phí trả theo chu kỳ cố định (Subscription)</span>
+              <span className="text-xs opacity-60">Biểu đồ biểu diễn biến động theo ngày (Daily) chỉ dành cho Cloud Pay-As-You-Go (Azure).</span>
+            </div>
+          ) : selectedMonth !== 'all' && data.buildMonth && selectedMonth !== data.buildMonth ? (
+            <div className="w-full flex flex-col items-center justify-center gap-2 py-8 text-on-surface-variant">
+              <span className="text-2xl">📅</span>
+              <span className="text-sm font-medium">Daily data chỉ có cho {data.buildMonth}</span>
+              <span className="text-xs opacity-60">Chọn {data.buildMonth} hoặc "All" để xem</span>
+            </div>
+          ) : (
+            <Line
+              data={{
+                labels: data.daily.map((_, i) => String(i + 1).padStart(2, '0')),
+                datasets: [{
+                  label: 'Azure Daily Cost', data: data.daily,
+                  borderColor: CLR.primary, backgroundColor: CLR.primary + '18',
+                  fill: true, tension: 0.3, pointRadius: 2.5,
+                  pointBackgroundColor: CLR.primary, borderWidth: 2.5,
+                }],
+              }}
+              options={{
+                ...BASE,
+                plugins: { legend: { display: false } },
+                scales: {
+                  x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+                  y: { beginAtZero: true, ticks: { callback: (v) => '$' + v } },
+                },
+              }}
+            />
+          )}
         </div>
       </div>
     </section>

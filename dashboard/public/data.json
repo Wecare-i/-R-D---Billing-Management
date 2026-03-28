@@ -1,40 +1,191 @@
 {
   "monthly": [
-    { "m": "T01", "az": 433.1, "gg": 0, "ms": 104.75 },
-    { "m": "T02", "az": 1055.25, "gg": 0, "ms": 119 },
-    { "m": "T03", "az": 1106.68, "gg": 471.26, "ms": 140.55 }
+    {
+      "m": "T01",
+      "az": 433.1,
+      "gg": 0,
+      "ms": 104.75
+    },
+    {
+      "m": "T02",
+      "az": 1055.25,
+      "gg": 0,
+      "ms": 119
+    },
+    {
+      "m": "T03",
+      "az": 1124.04,
+      "gg": 0,
+      "ms": 140.55
+    }
   ],
-  "daily": [22.37, 25.14, 28.91, 35.02, 40.18, 42.55, 38.72, 36.44, 41.20, 45.68, 39.80, 42.11, 38.55, 36.90, 40.21, 35.77, 38.44, 41.92, 44.55, 39.18, 35.22, 38.10, 42.77, 40.55, 37.88, 39.44, 35.20],
+  "daily": [
+    36.62,
+    38.13,
+    37.95,
+    36.12,
+    35.8,
+    35.91,
+    35.85,
+    36.73,
+    38.68,
+    43.17,
+    50.06,
+    43.7,
+    45.53,
+    38.5,
+    36.3,
+    48.12,
+    55.31,
+    47.92,
+    44.99,
+    45.31,
+    53.83,
+    54.42,
+    37.31,
+    52.89,
+    33.53,
+    33.26,
+    28.08
+  ],
   "resources": [
-    { "n": "fabricdlake", "t": "capacities", "c": 825.45 },
-    { "n": "wecare-ai-vm", "t": "virtualMachines", "c": 226.30 },
-    { "n": "storageprod", "t": "storageAccounts", "c": 25.66 },
-    { "n": "sql-wecare-core", "t": "sqlDatabases", "c": 12.44 },
-    { "n": "aks-cluster-dev", "t": "managedClusters", "c": 8.22 },
-    { "n": "appgw-prod", "t": "applicationGateways", "c": 5.11 },
-    { "n": "redis-cache", "t": "redis", "c": 3.50 },
-    { "n": "func-billing", "t": "sites", "c": 0.00 },
-    { "n": "keyvault-prod", "t": "vaults", "c": 0.00 },
-    { "n": "apim-wecare", "t": "apiManagement", "c": 0.00 }
+    {
+      "n": "wecaredb",
+      "t": "capacities",
+      "c": 839.3
+    },
+    {
+      "n": "ecommerce",
+      "t": "virtualmachines",
+      "c": 123.61
+    },
+    {
+      "n": "wecare-ai-dev",
+      "t": "virtualmachines",
+      "c": 61.82
+    },
+    {
+      "n": "hr-vm",
+      "t": "virtualmachines",
+      "c": 47.01
+    },
+    {
+      "n": "hr-vm_osdisk_1_3b10a6c442464e5495a220cfacdcf928",
+      "t": "disks",
+      "c": 17.11
+    },
+    {
+      "n": "wecare-ai-dev_osdisk_1_0f2d926e95254c998573b3c8939c0f99",
+      "t": "disks",
+      "c": 4.58
+    },
+    {
+      "n": "ecommerce_osdisk_1_24e7b3d407444c02a7b8a24f11e46c88",
+      "t": "disks",
+      "c": 4.58
+    },
+    {
+      "n": "dev-ip",
+      "t": "publicipaddresses",
+      "c": 3.23
+    },
+    {
+      "n": "ecommerce-ip",
+      "t": "publicipaddresses",
+      "c": 3.23
+    },
+    {
+      "n": "wecare-ai-dev-ip",
+      "t": "publicipaddresses",
+      "c": 3.23
+    }
   ],
   "services": [
-    { "name": "Microsoft Fabric", "t01": 280, "t02": 680, "t03": 825.45 },
-    { "name": "Virtual Machines", "t01": 120, "t02": 230, "t03": 226.30 },
-    { "name": "Storage", "t01": 15, "t02": 22, "t03": 25.66 },
-    { "name": "Azure SQL", "t01": 10, "t02": 12, "t03": 12.44 },
-    { "name": "Azure Kubernetes", "t01": 5, "t02": 8, "t03": 8.22 },
-    { "name": "Application Gateway", "t01": 3, "t02": 5, "t03": 5.11 }
+    {
+      "name": "Microsoft Fabric",
+      "t01": 104.36,
+      "t02": 755.52,
+      "t03": 839.3,
+      "total": 1699.1799999999998
+    },
+    {
+      "name": "Virtual Machines",
+      "t01": 268.53,
+      "t02": 242.46,
+      "t03": 232.43,
+      "total": 743.4200000000001
+    },
+    {
+      "name": "Storage",
+      "t01": 30.39,
+      "t02": 30.34,
+      "t03": 26.39,
+      "total": 87.12
+    },
+    {
+      "name": "Virtual Network",
+      "t01": 29.76,
+      "t02": 26.88,
+      "t03": 25.81,
+      "total": 82.45
+    },
+    {
+      "name": "Foundry Models",
+      "t01": 0.05,
+      "t02": 0.04,
+      "t03": 0.1,
+      "total": 0.19
+    },
+    {
+      "name": "Bandwidth",
+      "t01": 0.01,
+      "t02": 0.01,
+      "t03": 0.01,
+      "total": 0.03
+    },
+    {
+      "name": "Log Analytics",
+      "t01": 0,
+      "total": 0
+    }
   ],
-  "forecast": 1324,
-  "google": { "workspace": 420, "aiStudio": 48, "total": 471.26 },
+  "forecast": 1452.17,
+  "forecastBreakdown": {
+    "azure": 1311.62,
+    "google": 0,
+    "m365": 140.55
+  },
+  "google": {
+    "workspace": 0,
+    "aiStudio": 0,
+    "total": 0,
+    "source": "authenticated-fallback"
+  },
   "m365": {
     "total": 140.55,
     "items": [
-      { "name": "Power Apps per app plan", "cost": 60, "color": "#118DFF" },
-      { "name": "M365 Business Premium", "cost": 44, "color": "#12239E" },
-      { "name": "Power BI Pro", "cost": 20, "color": "#E66C37" },
-      { "name": "Power Automate per user", "cost": 16.55, "color": "#6B007B" }
+      {
+        "name": "Power BI Premium Per User",
+        "cost": 100.8,
+        "color": "#118DFF"
+      },
+      {
+        "name": "Power Apps Premium",
+        "cost": 24,
+        "color": "#12239E"
+      },
+      {
+        "name": "Power Automate Premium",
+        "cost": 15.75,
+        "color": "#E66C37"
+      },
+      {
+        "name": "Microsoft Agent 365 Frontier",
+        "cost": 0,
+        "color": "#6B007B"
+      }
     ]
   },
-  "buildTime": "27/03/2026 16:23 ICT"
+  "buildMonth": "T03",
+  "buildTime": "28/03/2026 10:49 ICT"
 }

@@ -11,14 +11,16 @@ export function KpiStrip({ data, selectedMonth }: Props) {
 
   const currentIdx = data.monthly.findIndex((m) => m.m === selectedMonth);
   const prev = currentIdx > 0 ? data.monthly[currentIdx - 1] : null;
-  const totalNow = current.az + current.gg + current.ms;
-  const totalPrev = prev ? prev.az + prev.gg + prev.ms : 0;
+  // Google cost: dùng google.total (subscription) vì monthly.gg không có byMonth data từ GCP
+  const googleMonthly = data.google.total;
+  const totalNow = current.az + googleMonthly + current.ms;
+  const totalPrev = prev ? prev.az + googleMonthly + prev.ms : 0;
   const momPct = totalPrev > 0 ? ((totalNow - totalPrev) / totalPrev) * 100 : 0;
 
   const kpis = [
     { label: `Total ${current.m}`, value: usdShort(totalNow), accent: 'border-primary/50 text-primary', highlight: true },
     { label: 'Azure', value: usdShort(current.az), accent: 'border-outline/40' },
-    { label: 'Google', value: usdShort(current.gg), accent: 'border-outline/40' },
+    { label: 'Google', value: usdShort(googleMonthly), accent: 'border-outline/40' },
     { label: 'M365', value: usdShort(current.ms), accent: 'border-outline/40' },
   ];
 
@@ -41,9 +43,17 @@ export function KpiStrip({ data, selectedMonth }: Props) {
           </div>
         </div>
       )}
-      <div className="bg-surface-container-low border border-accent-purple/50 rounded-full px-5 py-3 flex flex-col items-center justify-center text-center transition-all duration-200 hover:-translate-y-1 hover:bg-surface-container-high hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] cursor-default">
-        <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Forecast</span>
+      <div
+        className="bg-surface-container-low border border-accent-purple/50 rounded-full px-5 py-3 flex flex-col items-center justify-center text-center transition-all duration-200 hover:-translate-y-1 hover:bg-surface-container-high hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] cursor-default relative group"
+        title={data.forecastBreakdown
+          ? `Azure: ~$${data.forecastBreakdown.azure.toFixed(0)} · Google: $${data.forecastBreakdown.google.toFixed(0)} · M365: $${data.forecastBreakdown.m365.toFixed(0)}`
+          : 'Azure forecast only'}
+      >
+        <span className="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Forecast EOM</span>
         <span className="text-xl font-bold tabular-nums text-purple-400">~{usdShort(data.forecast || 0)}</span>
+        {data.forecastBreakdown && (
+          <span className="text-[9px] text-on-surface-variant/60 mt-0.5">All vendors</span>
+        )}
       </div>
     </section>
   );

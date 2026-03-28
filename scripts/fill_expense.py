@@ -60,11 +60,16 @@ def csv_to_excel(csv_path, output_path, template_xlsx=None):
                 cell = ws.cell(row=r_idx, column=c_idx)
                 # Chỉ ghi nếu có data (không ghi đè format của ô trống)
                 if value.strip():
+                    clean_val = value.replace(',', '')
                     try:
-                        # Thử parse số
-                        clean_val = value.replace(',', '')
-                        cell.value = int(clean_val)
-                        cell.number_format = '#,##0'
+                        # Thử parse float trước để giữ decimal (VD: $1,160.87 → 1160.87)
+                        float_val = float(clean_val)
+                        if float_val == int(float_val) and '.' not in value:
+                            cell.value = int(float_val)
+                            cell.number_format = '#,##0'
+                        else:
+                            cell.value = float_val
+                            cell.number_format = '#,##0.00'
                     except ValueError:
                         cell.value = value
     else:
@@ -87,10 +92,16 @@ def csv_to_excel(csv_path, output_path, template_xlsx=None):
             for c_idx, value in enumerate(row, 1):
                 cell = ws.cell(row=r_idx, column=c_idx)
                 if value.strip():
+                    clean_val = value.replace(',', '')
                     try:
-                        clean_val = value.replace(',', '')
-                        cell.value = int(clean_val)
-                        cell.number_format = '#,##0'
+                        # Thử parse float trước để giữ decimal (VD: $1,160.87 → 1160.87)
+                        float_val = float(clean_val)
+                        if float_val == int(float_val) and '.' not in value:
+                            cell.value = int(float_val)
+                            cell.number_format = '#,##0'
+                        else:
+                            cell.value = float_val
+                            cell.number_format = '#,##0.00'
                     except ValueError:
                         cell.value = value
 

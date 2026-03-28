@@ -29,6 +29,13 @@ export interface GoogleData {
   workspace: number;
   aiStudio: number;
   total: number;
+  source?: string;
+}
+
+export interface ForecastBreakdown {
+  azure: number;
+  google: number;
+  m365: number;
 }
 
 export interface BillingData {
@@ -37,7 +44,9 @@ export interface BillingData {
   resources: ResourceData[];
   services: ServiceData[];
   forecast: number | null;
+  forecastBreakdown: ForecastBreakdown | null;
   google: GoogleData;
   m365: { total: number; items: M365Item[] };
   buildTime?: string;
+  buildMonth?: string;  // tháng data.daily thuộc về, e.g. 'T03'
 }
