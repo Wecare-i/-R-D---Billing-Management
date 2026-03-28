@@ -50,6 +50,7 @@ jobs:
           AZURE_BILLING_PROFILE_1_ID: ${{ secrets.AZURE_BILLING_PROFILE_1_ID }}
           AZURE_BILLING_ACCOUNT_2_ID: ${{ secrets.AZURE_BILLING_ACCOUNT_2_ID }}
           AZURE_BILLING_PROFILE_2_ID: ${{ secrets.AZURE_BILLING_PROFILE_2_ID }}
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
 
       - name: Install dashboard dependencies
         run: npm ci
