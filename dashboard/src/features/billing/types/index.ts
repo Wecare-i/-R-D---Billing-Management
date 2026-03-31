@@ -28,6 +28,9 @@ export interface M365Item {
 export interface GoogleData {
   items: { name: string; cost: number; }[];
   total: number;
+  budget?: number;          // Monthly budget cap (e.g. 500)
+  currentSpend?: number;    // Actual spend from API/invoice
+  byMonth?: Record<string, number>;  // { T01: 374.5, T02: 418.92, T03: 471.26 }
   source?: string;
 }
 

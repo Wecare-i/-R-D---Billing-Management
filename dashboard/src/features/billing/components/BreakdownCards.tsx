@@ -19,10 +19,11 @@ export function BreakdownCards({ data, selectedMonth, showAzure, showGoogle, sho
   const cols = [showAzure, showGoogle, showM365].filter(Boolean).length;
   const gridClass = cols === 3 ? 'lg:grid-cols-3' : cols === 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-1';
 
-  // Google: monthly subscription — same every month
+  // Google: dùng monthly[].gg (đã có per-month từ byMonth/invoice)
   const googleTotal = selectedMonth === 'all'
-    ? data.google.total * data.monthly.length   // Q1 = monthly * numMonths
-    : data.google.total;
+    ? data.monthly.reduce((s, m) => s + m.gg, 0)   // Q1 tổng
+    : data.monthly.find(m => m.m === selectedMonth)?.gg ?? data.google.total;
+
 
   // M365: scale items từ T03 baseline về selected month total
   const m365Total = selectedMonth === 'all'
@@ -79,14 +80,61 @@ export function BreakdownCards({ data, selectedMonth, showAzure, showGoogle, sho
                 </span>
               </div>
             </div>
-            <span className="text-sm font-bold text-tertiary tabular-nums">{usd(googleTotal)}</span>
+            <div className="flex flex-col items-end gap-1">
+              <span className="text-sm font-bold text-tertiary tabular-nums">{usd(googleTotal)}</span>
+              {data.google.budget != null && selectedMonth !== 'all' && (
+                <span className="text-[10px] text-on-surface-variant/50 tabular-nums">
+                  Budget: {usd(data.google.budget)}
+                </span>
+              )}
+            </div>
           </div>
+
+          {/* Budget progress bar */}
+          {data.google.budget != null && selectedMonth !== 'all' && (
+            (() => {
+              const spend = googleTotal;
+              const budget = data.google.budget;
+              const pct = Math.min(100, Math.round((spend / budget) * 100));
+              const isWarning = pct >= 90;
+              const isDanger = pct >= 100;
+              return (
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center text-[10px] font-medium text-on-surface-variant/70 uppercase tracking-wider">
+                    <span>Budget usage</span>
+                    <span className={isDanger ? 'text-red-400' : isWarning ? 'text-amber-400' : 'text-tertiary'}>
+                      {pct}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-surface-container-lowest h-2 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{
+                        width: `${pct}%`,
+                        background: isDanger
+                          ? 'linear-gradient(90deg, #f87171, #ef4444)'
+                          : isWarning
+                          ? 'linear-gradient(90deg, #fbbf24, #f59e0b)'
+                          : 'linear-gradient(90deg, #34d399, var(--color-tertiary))'
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[9px] text-on-surface-variant/40 tabular-nums">
+                    <span>$0</span>
+                    <span>{usd(budget)}</span>
+                  </div>
+                </div>
+              );
+            })()
+          )}
+
+          {/* Item breakdown */}
           <div className="space-y-3">
             {googleTotal === 0 ? (
               <div className="w-full flex flex-col items-center justify-center gap-2 py-4 text-on-surface-variant bg-surface-container-lowest rounded-lg border border-dashed border-outline/30">
-                <span className="text-xl">🔌</span>
-                <span className="text-xs font-medium text-center">Chưa có data từ Google API</span>
-                <span className="text-[10px] opacity-60 text-center px-4">Setup Budget trên GCP Console để theo dõi chi phí</span>
+                <span className="text-xl">📭</span>
+                <span className="text-xs font-medium text-center">Chưa có hóa đơn tháng này</span>
+                <span className="text-[10px] opacity-60 text-center px-4">Hóa đơn Google được lưu theo tháng khi có invoice thực tế</span>
               </div>
             ) : data.google.items.length > 0 ? (
               data.google.items.map((item) => {
@@ -105,19 +153,39 @@ export function BreakdownCards({ data, selectedMonth, showAzure, showGoogle, sho
                 );
               })
             ) : (
-              <div>
+              <div className="space-y-2">
                 <div className="flex justify-between items-end">
-                  <span className="text-xs text-on-surface-variant font-medium">Tổng chi phí (Chưa có BigQuery Breakdown)</span>
+                  <span className="text-xs text-on-surface-variant font-medium">Tổng chi phí từ invoice</span>
                   <span className="text-sm font-bold tabular-nums">{usd(googleTotal)}</span>
                 </div>
-                <div className="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden mt-1">
+                <div className="w-full bg-surface-container-lowest h-1.5 rounded-full overflow-hidden">
                   <div className="bg-tertiary h-full transition-all duration-700" style={{ width: '100%', opacity: 1 }} />
                 </div>
+                <p className="text-[10px] text-on-surface-variant/50 pt-1">
+                  Breakdown theo dịch vụ sẽ có sau khi enable BigQuery Billing Export
+                </p>
               </div>
             )}
           </div>
+
+
+          {/* Source badge */}
+          {data.google.source && (
+            <div className="pt-1 border-t border-outline-variant/10">
+              <span className={`text-[9px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full ${
+                data.google.source === 'manual-invoice'
+                  ? 'bg-amber-400/10 text-amber-400'
+                  : data.google.source === 'budget-api'
+                  ? 'bg-tertiary/10 text-tertiary'
+                  : 'bg-surface-container text-on-surface-variant/50'
+              }`}>
+                {data.google.source === 'manual-invoice' ? '📄 Manual Invoice' : data.google.source === 'budget-api' ? '🔗 Budget API' : data.google.source}
+              </span>
+            </div>
+          )}
         </div>
       )}
+
 
       {/* M365 */}
       {showM365 && (

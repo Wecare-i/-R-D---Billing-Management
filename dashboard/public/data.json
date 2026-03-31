@@ -15,7 +15,7 @@
     {
       "m": "T03",
       "az": 1124.28,
-      "gg": 0,
+      "gg": 471.26,
       "ms": 140.55
     }
   ],
@@ -149,16 +149,17 @@
       "total": 0
     }
   ],
-  "forecast": 1452.17,
+  "forecast": 1923.43,
   "forecastBreakdown": {
     "azure": 1311.62,
-    "google": 0,
+    "google": 471.26,
     "m365": 140.55
   },
   "google": {
     "items": [],
-    "total": 0,
-    "source": "authenticated-fallback"
+    "total": 471.26,
+    "byMonth": { "T03": 471.26 },
+    "source": "manual-invoice"
   },
   "m365": {
     "total": 140.55,

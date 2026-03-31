@@ -112,27 +112,32 @@
 | Vendor | API | Auth | Service Principal / SA | Status |
 |---|---|---|---|---|
 | **Azure** | Azure Cost Management API | Service Principal (OAuth) | `Admin_WECARE` (`68e90e4b-610c-4657-9d59-4d789853103f`) | ✅ Hoạt động — role `Cost Management Reader` |
-| **Google** | Cloud Billing Budget API | Service Account (JSON key) | `studio-key@wecare-ai-studio.iam.gserviceaccount.com` | ⏳ Budget tạo xong, chờ Google fill `currentSpend` (~24h) — role `Billing Account Viewer` + `costsManager` |
+| **Google** | BigQuery Billing Export | Service Account (JSON key) | `studio-key@wecare-ai-studio.iam.gserviceaccount.com` | ⏳ Pending setup — hiện dùng **manual-invoice** (T03=$471.26). Xem [setup guide](02_analysis/notes/bigquery-billing-export-setup.md) |
 
-**Google Cloud Billing Budget API — Chi tiết kết nối:**
+**Google Cloud Billing — Chi tiết kết nối & trạng thái (2026-03-31):**
 
 | Thông tin | Giá trị |
 |---|---|
 | Billing Account ID | `01E5FF-07AFF5-FD37C5` |
 | Organization | `wecare-i.com` |
-| API Endpoint | `billingbudgets.googleapis.com` |
 | Service Account | `studio-key@wecare-ai-studio.iam.gserviceaccount.com` |
 | Client ID | `109523826902655221841` |
 | Key file | `gcp-sa-key.json` (gitignored) |
 | Projects linked | `Project-2025` (`project-2025-449801`), `Wecare AI Studio` (`wecare-ai-studio`) |
-| Roles | `Billing Account Viewer` + `Billing Account Costs Manager` |
-| Budget ID | `33d7109e-e26b-4515-af5e-c468b9633719` |
-| Budget name | `Wecare Monthly Budget` |
-| Budget amount | Last period amount (auto-adjust theo actual spend) |
-| Budget period | Monthly (auto reset đầu tháng) |
-| `currentSpend` status | ⏳ Tạo lúc 2026-03-28, chờ Google populate ~24h |
+| Roles hiện có | `Billing Account Viewer` + `Billing Account Costs Manager` |
+| Budget (monitoring only) | `Wecare Monthly Budget` (ID: `33d7109e-e26b-4515-af5e-c468b9633719`) |
 
-> ⚠️ Key file `gcp-sa-key.json` nằm ở root folder — **KHÔNG commit lên git** (đã gitignored).
+**Kết quả điều tra API (2026-03-31):**
+
+| API | Kết quả | Ghi chú |
+|---|---|---|
+| Budget API v1 `billingbudgets.googleapis.com` | ✅ 200 — budget info | ❌ **KHÔNG có `currentSpend`** — chỉ có budget cap. Ghi chú cũ "chờ 24h" là **SAI** |
+| Invoice API `cloudbilling.googleapis.com/v1/invoices` | ❌ 404 | Endpoint không tồn tại |
+| Cloud Billing Reports alpha | ❌ 404 | Không tồn tại |
+| BigQuery Billing Export | ✅ Hoạt động sau khi enable | **Cách duy nhất** lấy actual cost data qua API |
+
+> ⚠️ Kết luận: **Google không có REST API nào expose actual cost** nếu không qua BigQuery Export — khác hoàn toàn với Azure Cost Management API.
+> Key file `gcp-sa-key.json` nằm ở root folder — **KHÔNG commit lên git** (đã gitignored).
 
 #### Browser API (Billing_Report.html) — Yêu cầu bổ sung
 
@@ -148,7 +153,7 @@
 
 > 💡 Lần đầu mở trang sẽ redirect sang Azure login. Sau đó token cache trong localStorage — mở lại **không cần đăng nhập lại**.
 >
-> **Google Cloud Billing**: Không có REST API trả cost trực tiếp từ browser — data hardcoded, cập nhật thủ công hàng tháng.
+> **Google Cloud Billing**: Không có REST API nào expose actual cost (kể cả server-side) nếu không setup BigQuery Billing Export. Hiện dùng **manual-invoice** — cập nhật `data.json` thủ công sau khi có invoice từ GCP Console mỗi tháng.
 
 ---
 
@@ -280,18 +285,30 @@ Cần thao tác trên **M365 Admin Center** → Users → Active users → chọ
   - Sửa logic biểu đồ Daily Cost: Tự động ẩn biểu đồ đường day-by-day (hiển thị chú thích cảnh báo) khi chọn các Vendor tính phí Subscription phẳng (Google/M365) để tránh gây hiểu lầm. Đồng thời Title tự động cập nhật linh hoạt theo tháng được chọn.
   - Cân đối tỷ lệ dữ liệu (Scale Proportional) cho M365 Card ở cả 3 tháng lịch sử (T01, T02, T03) thay vì clone số liệu của tháng hiện tại xuống.
   - Căn lề trái thẩm mỹ cho `ResourceBars` của Azure, thêm thuộc tính tooltip đọc Full name các Server bị dài.
-- [x] **Setup Google Cloud Billing Budget API** (2026-03-28)
-  - Enable `billingbudgets.googleapis.com` trên cả 2 projects
-  - Grant SA `studio-key` thêm role `Billing Account Costs Manager`
-  - Tạo budget `Wecare Monthly Budget` (ID: `33d7109e-e26b-4515-af5e-c468b9633719`)
-  - Script test: `scripts/test-gcp-budget-api.js` — ✅ API kết nối OK
-  - ⏳ **Chờ ~24h** để Google fill `currentSpend` → test lại sau 2026-03-29
+- [x] **Điều tra Google Billing API** (2026-03-28 → 2026-03-31)
+  - Tạo budget `Wecare Monthly Budget` (ID: `33d7109e-e26b-4515-af5e-c468b9633719`) — dùng cho monitoring alert, không lấy cost data được
+  - ❌ Budget API v1: **không có `currentSpend`** — ghi chú "chờ 24h" trong phiên bản cũ là SAI, đã đính chính
+  - ❌ Invoice API, Cloud Billing Reports: endpoint không tồn tại (404)
+  - ✅ Kết luận: BigQuery Billing Export là cách duy nhất → code đã viết sẵn, pending enable trong GCP Console
+- [x] **Điền Google data T03/2026 vào dashboard** (2026-03-31)
+  - `data.json`: T03 Google = $471.26 (từ invoice thực), T01/T02 = 0 (không có invoice)
+  - `google.items = []` — chờ BigQuery để có breakdown theo dịch vụ
+  - Source badge: "📄 Manual Invoice" — transparent với người xem
 
 **🔥 Ưu tiên cao — Làm tiếp:**
-- [ ] **⏳ Test Google Budget API sau 2026-03-29** — chạy `node scripts/test-gcp-budget-api.js`, verify `currentSpend.units` > 0, sau đó integrate vào `fetch-and-build.js` để replace hardcode `471.26`
+- [x] **Setup Google BigQuery Billing Export code** — `fetch-and-build.js` BigQuery-first strategy (2026-03-31)
+  - `fetchGoogleBigQuery()`: query `billing_export` dataset → cost breakdown by service + month
+  - Graceful fallback: BigQuery → Budget API cap → manual-invoice
+  - Test script: `node scripts/test-gcp-bigquery.js`
+  - Setup guide: `02_analysis/notes/bigquery-billing-export-setup.md`
+- [ ] **⏳ Enable BigQuery Billing Export trong GCP Console** — xem `02_analysis/notes/bigquery-billing-export-setup.md`
+  - [ ] Enable export: Billing → BigQuery export → project `wecare-ai-studio` → dataset `billing_export`
+  - [ ] Grant SA: `studio-key@wecare-ai-studio.iam.gserviceaccount.com` roles `BigQuery Data Viewer` + `BigQuery Job User`
+  - [ ] Add GitHub Secrets: `GCP_BQ_DATASET`, `GCP_BQ_TABLE`
+  - [ ] Verify sau 24-48h: `node scripts/test-gcp-bigquery.js`
 - [ ] **Fill bảng kê chi phí T03/2026** — chờ hết tháng, lấy invoice chính thức
 - [ ] **Cleanup suspended licenses** — unassign 7 users (VIRTUAL_AGENT_USL + Copilot) trên Admin Center
-- [ ] **Dashboard enhancements** — export CSV/PDF, responsive mobile, thêm budget tracking
+
 
 **📋 Nhắc nhở (low priority):**
 - [ ] Lập ĐNTT hoàn tiền T03 cho Khôi — Google $471.26 + M365 $119

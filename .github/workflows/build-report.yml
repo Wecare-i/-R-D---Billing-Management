@@ -47,7 +47,7 @@ jobs:
       - name: Install root dependencies
         run: npm ci
 
-      - name: Fetch Azure data → data.json
+      - name: Fetch Azure + Google data → data.json
         run: npm run build
         env:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -59,6 +59,8 @@ jobs:
           AZURE_BILLING_ACCOUNT_2_ID: ${{ secrets.AZURE_BILLING_ACCOUNT_2_ID }}
           AZURE_BILLING_PROFILE_2_ID: ${{ secrets.AZURE_BILLING_PROFILE_2_ID }}
           GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+          GCP_BQ_DATASET: ${{ secrets.GCP_BQ_DATASET }}
+          GCP_BQ_TABLE: ${{ secrets.GCP_BQ_TABLE }}
 
       - name: Cache dashboard node_modules
         uses: actions/cache@v4

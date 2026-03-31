@@ -201,86 +201,182 @@ async function fetchM365Costs(token) {
 }
 
 // ─── Google Cloud Billing ─────────────────────────────────────
-async function getGcpAccessToken(credentials) {
-  // Tạo JWT cho Service Account
+async function getGcpAccessToken(credentials, scope) {
   const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url');
   const now = Math.floor(Date.now() / 1000);
   const payload = Buffer.from(JSON.stringify({
     iss: credentials.client_email,
-    scope: 'https://www.googleapis.com/auth/cloud-billing.readonly',
+    scope,
     aud: 'https://oauth2.googleapis.com/token',
-    iat: now,
-    exp: now + 3600
+    iat: now, exp: now + 3600
   })).toString('base64url');
 
   const crypto = require('crypto');
   const sign = crypto.createSign('RSA-SHA256');
   sign.update(`${header}.${payload}`);
   const sig = sign.sign(credentials.private_key, 'base64url');
-
   const jwt = `${header}.${payload}.${sig}`;
+
   const res = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`
   });
-  if (!res.ok) throw new Error(`GCP token error: ${res.status} ${await res.text()}`);
+  if (!res.ok) throw new Error(`GCP token error: ${res.status}`);
   return (await res.json()).access_token;
+}
+
+// Query BigQuery Billing Export — lấy cost breakdown thực tế
+async function fetchGoogleBigQuery(creds) {
+  const project = creds.project_id; // wecare-ai-studio
+  const dataset = process.env.GCP_BQ_DATASET || 'billing_export'; // tên dataset trong .env (optional)
+  const table   = process.env.GCP_BQ_TABLE   || 'gcp_billing_export_v1_01E5FF_07AFF5_FD37C5';
+
+  const token = await getGcpAccessToken(creds,
+    'https://www.googleapis.com/auth/bigquery.readonly'
+  );
+
+  const year = new Date().getFullYear();
+
+  // Detailed cost query: group by service + month (YTD)
+  const query = `
+    SELECT
+      service.description                                  AS service_name,
+      FORMAT_TIMESTAMP('%Y-%m', usage_start_time)         AS month,
+      ROUND(SUM(cost + IFNULL((
+        SELECT SUM(c.amount) FROM UNNEST(credits) c
+      ), 0)), 2)                                           AS net_cost
+    FROM \`${project}.${dataset}.${table}\`
+    WHERE
+      invoice.month BETWEEN '${year}01' AND '${year}12'
+      AND project.id IS NOT NULL
+    GROUP BY 1, 2
+    HAVING net_cost > 0
+    ORDER BY 2, net_cost DESC
+  `;
+
+  const res = await fetch(
+    `https://bigquery.googleapis.com/bigquery/v2/projects/${project}/queries`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, useLegacySql: false, timeoutMs: 30000 })
+    }
+  );
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`BigQuery query failed ${res.status}: ${err.substring(0, 150)}`);
+  }
+
+  const bqData = await res.json();
+
+  if (bqData.jobComplete === false) {
+    throw new Error('BigQuery query timed out (>30s) — dataset có thể chưa có data');
+  }
+
+  if (bqData.errors?.length) {
+    throw new Error(`BigQuery error: ${bqData.errors[0].message}`);
+  }
+
+  // Parse rows → { byMonth, items, total }
+  const rows = bqData.rows || [];
+  if (!rows.length) {
+    throw new Error('BigQuery returned 0 rows — Billing Export chưa có data (cần 24-48h sau khi enable)');
+  }
+
+  // Aggregate by month + service
+  const byMonth = {};        // { 'T01': 374.5, 'T02': 418.92 }
+  const serviceByMonth = {}; // { 'T03': { 'Google Workspace': 312, ... } }
+
+  rows.forEach(row => {
+    const [svcName, monthStr, costStr] = row.f.map(f => f.v);
+    const cost  = parseFloat(costStr) || 0;
+    const [yr, mo] = monthStr.split('-');
+    const mKey  = `T${mo}`;
+
+    byMonth[mKey]      = (byMonth[mKey] || 0) + cost;
+    if (!serviceByMonth[mKey]) serviceByMonth[mKey] = {};
+    serviceByMonth[mKey][svcName] = (serviceByMonth[mKey][svcName] || 0) + cost;
+  });
+
+  // Latest month → items breakdown
+  const latestMonth = Object.keys(byMonth).sort().pop();
+  const svcMap = serviceByMonth[latestMonth] || {};
+  const colors = ['#34d399', '#059669', '#10b981', '#6ee7b7', '#a7f3d0'];
+  const items = Object.entries(svcMap)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([name, cost], i) => ({ name, cost: Math.round(cost * 100) / 100, color: colors[i % colors.length] }));
+
+  const total = Math.round((byMonth[latestMonth] || 0) * 100) / 100;
+
+  console.log(`   ✅ BigQuery: ${rows.length} rows | ${Object.keys(byMonth).join(', ')} | latest=${latestMonth} $${total}`);
+  return { items, total, byMonth, source: 'bigquery' };
+}
+
+// Budget API — fallback khi BQ chưa có data  
+async function fetchGoogleBudgetApi(creds) {
+  const token = await getGcpAccessToken(creds,
+    'https://www.googleapis.com/auth/cloud-platform'
+  );
+  const res = await fetch(
+    `https://billingbudgets.googleapis.com/v1/billingAccounts/${GCP_BILLING_ACCOUNT}/budgets`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  if (!res.ok) throw new Error(`Budget API ${res.status}`);
+
+  const { budgets } = await res.json();
+  if (!budgets?.length) throw new Error('No budgets found');
+
+  const b = budgets[0];
+  // Budget API v1 không có currentSpend — chỉ lấy budget cap
+  const budgetCap = parseFloat(b.amount?.specifiedAmount?.units || '0') || null;
+  console.log(`   ℹ️  Budget API: cap=$${budgetCap} (currentSpend không available ở v1)`);
+  return { budgetCap };
 }
 
 async function fetchGoogleBilling() {
   const creds = loadGcpCredentials();
   if (!creds) {
-    console.warn('   ⚠️  GCP credentials not found — sử dụng Google fallback data');
+    console.warn('   ⚠️  GCP credentials not found — dùng data.json (manual-invoice)');
     return GOOGLE_FALLBACK;
   }
 
+  // ── Strategy 1: BigQuery Billing Export (primary) ───────────
   try {
-    const gcpToken = await getGcpAccessToken(creds);
-    const year = new Date().getFullYear();
+    console.log('   📊 Trying BigQuery Billing Export...');
+    const bqData = await fetchGoogleBigQuery(creds);
 
-    // Fetch monthly cost breakdown by project
-    const url = `https://cloudbilling.googleapis.com/v1/billingAccounts/${GCP_BILLING_ACCOUNT}/skus`;
+    // Lấy thêm budget cap từ Budget API (optional, không fail nếu lỗi)
+    let budgetCap = null;
+    try {
+      const { budgetCap: cap } = await fetchGoogleBudgetApi(creds);
+      budgetCap = cap;
+    } catch { /* ignore */ }
 
-    // Dùng BigQuery export API không có ở đây — dùng Cloud Billing Budget API để lấy tổng cost
-    const budgetRes = await fetch(
-      `https://billingbudgets.googleapis.com/v1/billingAccounts/${GCP_BILLING_ACCOUNT}/budgets`,
-      { headers: { Authorization: `Bearer ${gcpToken}` } }
-    );
+    return { ...bqData, ...(budgetCap && { budget: budgetCap }) };
 
-    // Cloud Billing API — lấy invoice list
-    const invoiceRes = await fetch(
-      `https://cloudbilling.googleapis.com/v1/billingAccounts/${GCP_BILLING_ACCOUNT}/:export` +
-      `?datasetId=billing_export&startDate.year=${year}&startDate.month=1&endDate.year=${year}&endDate.month=12`,
-      { headers: { Authorization: `Bearer ${gcpToken}` } }
-    );
-
-    // Google Cloud Billing không có simple REST API trả cost —
-    // Cần BigQuery export hoặc Billing Reports API
-    // → Dùng Budget API để lấy spend amount nếu có budget setup
-    if (budgetRes.ok) {
-      const budgets = await budgetRes.json();
-      if (budgets.budgets?.length > 0) {
-        console.log(`   ✅ GCP Budgets found: ${budgets.budgets.length}`);
-        // Parse budget spend — nếu có setup budget
-        const totalSpend = budgets.budgets.reduce((sum, b) => {
-          return sum + parseFloat(b.amount?.specifiedAmount?.units || '0');
-        }, 0);
-        if (totalSpend > 0) {
-          return { items: [], total: totalSpend, byMonth: {}, source: 'budget-api' };
-        }
-      }
-    }
-
-    // Fallback: đã authenticate thành công nhưng không có budget data
-    console.log('   ⚠️  GCP authed but no budget data — dùng fallback');
-    return { ...GOOGLE_FALLBACK, source: 'authenticated-fallback' };
-
-  } catch (err) {
-    console.warn(`   ⚠️  GCP Billing fetch failed: ${err.message.substring(0, 100)}`);
-    return GOOGLE_FALLBACK;
+  } catch (bqErr) {
+    console.warn(`   ⚠️  BigQuery: ${bqErr.message.substring(0, 120)}`);
   }
+
+  // ── Strategy 2: Budget API (biết budget cap, không có spend) ─
+  try {
+    console.log('   📊 Trying Budget API fallback...');
+    const { budgetCap } = await fetchGoogleBudgetApi(creds);
+    console.log('   ⚠️  Chưa có BigQuery export → dùng data.json (manual-invoice)');
+    return { ...GOOGLE_FALLBACK, ...(budgetCap && { budget: budgetCap }), source: 'manual-invoice' };
+  } catch (budgetErr) {
+    console.warn(`   ⚠️  Budget API: ${budgetErr.message.substring(0, 80)}`);
+  }
+
+  // ── Strategy 3: manual-invoice (data.json giữ nguyên) ────────
+  console.warn('   ⚠️  GCP fully offline — dùng data.json (manual-invoice)');
+  return GOOGLE_FALLBACK;
 }
+
+
 
 // ─── Data Processing ────────────────────────────────────────
 function processMonthly(rows) {
@@ -425,6 +521,9 @@ async function main() {
     google: {
       items: googleData.items || [],
       total: googleData.total,
+      ...(googleData.budget != null && { budget: googleData.budget }),
+      ...(googleData.currentSpend != null && { currentSpend: googleData.currentSpend }),
+      byMonth: googleData.byMonth || {},
       source: googleData.source || 'api'
     },
     m365: { total: m365.total, items: m365.items },
