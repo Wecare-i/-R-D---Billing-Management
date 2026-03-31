@@ -1,7 +1,7 @@
 ## Billing Management — Quản Lý Chi Phí & Thanh Toán
 
-**Last Updated**: 2026-03-27  
-**Last Reviewed**: 2026-03-27
+**Last Updated**: 2026-03-28  
+**Last Reviewed**: 2026-03-28
 
 > Quản lý thanh toán hàng tháng cho bộ phận Tech (R&D/Core): tạo phiếu bảng kê chi phí, điều tra bất thường, theo dõi billing từ Azure + Google + M365, và build Power BI dashboard tự động.
 
@@ -112,20 +112,25 @@
 | Vendor | API | Auth | Service Principal / SA | Status |
 |---|---|---|---|---|
 | **Azure** | Azure Cost Management API | Service Principal (OAuth) | `Admin_WECARE` (`68e90e4b-610c-4657-9d59-4d789853103f`) | ✅ Hoạt động — role `Cost Management Reader` |
-| **Google** | Cloud Billing API | Service Account (JSON key) | `studio-key@wecare-ai-studio.iam.gserviceaccount.com` | ✅ Đã setup — role `Billing Account Viewer` |
+| **Google** | Cloud Billing Budget API | Service Account (JSON key) | `studio-key@wecare-ai-studio.iam.gserviceaccount.com` | ⏳ Budget tạo xong, chờ Google fill `currentSpend` (~24h) — role `Billing Account Viewer` + `costsManager` |
 
-**Google Cloud Billing API — Chi tiết kết nối:**
+**Google Cloud Billing Budget API — Chi tiết kết nối:**
 
 | Thông tin | Giá trị |
 |---|---|
 | Billing Account ID | `01E5FF-07AFF5-FD37C5` |
 | Organization | `wecare-i.com` |
-| API Endpoint | `cloudbilling.googleapis.com` |
+| API Endpoint | `billingbudgets.googleapis.com` |
 | Service Account | `studio-key@wecare-ai-studio.iam.gserviceaccount.com` |
 | Client ID | `109523826902655221841` |
 | Key file | `gcp-sa-key.json` (gitignored) |
 | Projects linked | `Project-2025` (`project-2025-449801`), `Wecare AI Studio` (`wecare-ai-studio`) |
-| Role | `Billing Account Viewer` |
+| Roles | `Billing Account Viewer` + `Billing Account Costs Manager` |
+| Budget ID | `33d7109e-e26b-4515-af5e-c468b9633719` |
+| Budget name | `Wecare Monthly Budget` |
+| Budget amount | Last period amount (auto-adjust theo actual spend) |
+| Budget period | Monthly (auto reset đầu tháng) |
+| `currentSpend` status | ⏳ Tạo lúc 2026-03-28, chờ Google populate ~24h |
 
 > ⚠️ Key file `gcp-sa-key.json` nằm ở root folder — **KHÔNG commit lên git** (đã gitignored).
 
@@ -275,8 +280,15 @@ Cần thao tác trên **M365 Admin Center** → Users → Active users → chọ
   - Sửa logic biểu đồ Daily Cost: Tự động ẩn biểu đồ đường day-by-day (hiển thị chú thích cảnh báo) khi chọn các Vendor tính phí Subscription phẳng (Google/M365) để tránh gây hiểu lầm. Đồng thời Title tự động cập nhật linh hoạt theo tháng được chọn.
   - Cân đối tỷ lệ dữ liệu (Scale Proportional) cho M365 Card ở cả 3 tháng lịch sử (T01, T02, T03) thay vì clone số liệu của tháng hiện tại xuống.
   - Căn lề trái thẩm mỹ cho `ResourceBars` của Azure, thêm thuộc tính tooltip đọc Full name các Server bị dài.
+- [x] **Setup Google Cloud Billing Budget API** (2026-03-28)
+  - Enable `billingbudgets.googleapis.com` trên cả 2 projects
+  - Grant SA `studio-key` thêm role `Billing Account Costs Manager`
+  - Tạo budget `Wecare Monthly Budget` (ID: `33d7109e-e26b-4515-af5e-c468b9633719`)
+  - Script test: `scripts/test-gcp-budget-api.js` — ✅ API kết nối OK
+  - ⏳ **Chờ ~24h** để Google fill `currentSpend` → test lại sau 2026-03-29
 
 **🔥 Ưu tiên cao — Làm tiếp:**
+- [ ] **⏳ Test Google Budget API sau 2026-03-29** — chạy `node scripts/test-gcp-budget-api.js`, verify `currentSpend.units` > 0, sau đó integrate vào `fetch-and-build.js` để replace hardcode `471.26`
 - [ ] **Fill bảng kê chi phí T03/2026** — chờ hết tháng, lấy invoice chính thức
 - [ ] **Cleanup suspended licenses** — unassign 7 users (VIRTUAL_AGENT_USL + Copilot) trên Admin Center
 - [ ] **Dashboard enhancements** — export CSV/PDF, responsive mobile, thêm budget tracking
