@@ -34,7 +34,12 @@ const BILLING_PROFILES = [
 function loadGcpCredentials() {
   if (process.env.GCP_SA_KEY) {
     try {
-      return JSON.parse(process.env.GCP_SA_KEY);
+      // Strip surrounding single or double quotes (common when set via .env or GitHub Secrets)
+      let raw = process.env.GCP_SA_KEY.trim();
+      if ((raw.startsWith("'") && raw.endsWith("'")) || (raw.startsWith('"') && raw.endsWith('"'))) {
+        raw = raw.slice(1, -1);
+      }
+      return JSON.parse(raw);
     } catch (e) {
       console.warn('   ⚠️  GCP_SA_KEY parse failed:', e.message);
     }
