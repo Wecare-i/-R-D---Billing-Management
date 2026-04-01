@@ -70,6 +70,24 @@ const GOOGLE_FALLBACK = {
   byMonth: {}, source: 'fallback'
 };
 
+// ─── Preserved Fallback ──────────────────────────────────────
+// Đọc google data từ data.json hiện tại để không bị mất khi BigQuery fail
+function loadPreservedGoogleData() {
+  const dataJsonPath = require('path').join(__dirname, '..', 'dashboard', 'public', 'data.json');
+  try {
+    if (fs.existsSync(dataJsonPath)) {
+      const existing = JSON.parse(fs.readFileSync(dataJsonPath, 'utf-8'));
+      if (existing?.google?.total > 0) {
+        console.log(`   📂 Preserved Google data from data.json: $${existing.google.total} (${existing.google.source})`);
+        return { ...existing.google, source: 'manual-invoice' };
+      }
+    }
+  } catch (e) {
+    console.warn('   ⚠️  Could not read existing data.json:', e.message);
+  }
+  return GOOGLE_FALLBACK;
+};
+
 // ─── Azure Auth ──────────────────────────────────────────────
 async function getToken() {
   const credential = new ClientSecretCredential(TENANT_ID, CLIENT_ID, CLIENT_SECRET);
@@ -343,9 +361,12 @@ async function fetchGoogleBudgetApi(creds) {
 
 async function fetchGoogleBilling() {
   const creds = loadGcpCredentials();
+  // Luôn load preserved data trước — nếu mọi strategy đều fail, dùng giá trị này
+  const preserved = loadPreservedGoogleData();
+
   if (!creds) {
-    console.warn('   ⚠️  GCP credentials not found — dùng data.json (manual-invoice)');
-    return GOOGLE_FALLBACK;
+    console.warn('   ⚠️  GCP credentials not found — giữ nguyên data.json (manual-invoice)');
+    return preserved;
   }
 
   // ── Strategy 1: BigQuery Billing Export (primary) ───────────
@@ -370,15 +391,16 @@ async function fetchGoogleBilling() {
   try {
     console.log('   📊 Trying Budget API fallback...');
     const { budgetCap } = await fetchGoogleBudgetApi(creds);
-    console.log('   ⚠️  Chưa có BigQuery export → dùng data.json (manual-invoice)');
-    return { ...GOOGLE_FALLBACK, ...(budgetCap && { budget: budgetCap }), source: 'manual-invoice' };
+    console.log('   ⚠️  Chưa có BigQuery export → giữ nguyên data.json (manual-invoice)');
+    // Merge budget cap vào preserved data, giữ nguyên total từ data.json
+    return { ...preserved, ...(budgetCap && { budget: budgetCap }), source: 'manual-invoice' };
   } catch (budgetErr) {
     console.warn(`   ⚠️  Budget API: ${budgetErr.message.substring(0, 80)}`);
   }
 
-  // ── Strategy 3: manual-invoice (data.json giữ nguyên) ────────
-  console.warn('   ⚠️  GCP fully offline — dùng data.json (manual-invoice)');
-  return GOOGLE_FALLBACK;
+  // ── Strategy 3: Preserve existing data.json Google (không ghi đè bằng $0) ─
+  console.warn('   ⚠️  GCP fully offline — giữ nguyên Google data từ data.json');
+  return preserved;
 }
 
 
