@@ -238,6 +238,16 @@ Tech_Bảng kê chi phí_T{tháng}.{năm}.xlsx
 
 ---
 
+#### Quy trình Thanh toán & Đàm phán Tài chính
+_Lưu trữ các rủi ro hệ thống, chính sách thanh toán và biên bản chuẩn bị làm việc với Team Tài chính._
+
+| Tài liệu | Link | Mục đích |
+|---|---|---|
+| **Meeting Notes & Pain Points** | [Meeting_Notes_Finance_April2026.md](file:///d:/_Antigravity/01_Workspace/Billing%20Management/02_analysis/notes/Meeting_Notes_Finance_April2026.md) | Lưu trữ bằng chứng: Rủi ro thẻ cty hết hạn mức, Catch-22 chốt sổ, Cú vênh tỷ giá |
+| **Q&A Checklist (Vũ khí đàm phán)** | [Finance_Meeting_QA_Checklist.md](file:///d:/_Antigravity/01_Workspace/Billing%20Management/02_analysis/notes/Finance_Meeting_QA_Checklist.md) | Bộ câu hỏi "đáp xoáy" (Forecast Buffer, ngoại tệ, rủi ro sập Server) dành cho Tech Lead |
+
+---
+
 #### Known Issues
 - Thẻ cty MC ****6249 dùng chung Sale/Marketing → risk hết hạn mức khi billing cycle đến
 - T01/2026 đã trừ thẻ Khôi ($362.11 Azure) → **cần xác nhận đã hoàn tiền chưa**
