@@ -19,7 +19,9 @@ Dưới đây là danh sách các câu hỏi trọng tâm (đã được cấu t
   2. Tech có được phép đính kèm **Sao kê tin nhắn trừ tiền từ Ngân hàng / Thẻ tín dụng** làm chứng cứ để hạch toán phần chênh lệch tỷ giá này luôn mà không cần "hồi môn" lại tờ Đề xuất tuần trước không?
 
 ### Chủ đề 3: Vấn đề hạn mức thẻ tín dụng và đề xuất Thẻ thanh toán riêng
-- **Vấn đề đặt ra:** Thẻ cty (50M) đang dùng chung nên hay bị "cháy" hạn mức. Điểm chết là: Ngày mùng 1 Cloud tự động charge thất bại do thẻ rỗng, vài ngày sau Kế toán nạp tiền vào thì hệ thống Cloud **KHÔNG tự động trừ tiền lại**. Hậu quả là 15 ngày sau service đột ngột bị suspend. Lúc đó Tech lại phải chạy đi hỏi Kế toán "thẻ đủ tiền chưa chị" để login vào portal tự bấm "Thanh toán lại" bằng tay, cực kỳ thụ động và rủi ro sập Server.
+- **Vấn đề đặt ra:** Thẻ cty (50M) đang dùng chung nên liên tục "cháy" hạn mức, gây ra 2 cản trở chí mạng:
+  1. Khi cần đăng ký cấp bách dịch vụ phải thanh toán ngay (vd: mua 6 acc Claude Team), thẻ rỗng là thanh toán tạch. Tech phải đi hỏi Kế toán. Nếu chưa có tiền, ngày nào Tech cũng phải nhắn hỏi "Thẻ có tiền chưa chị" như đi đòi nợ chỉ để... mua tool cho công ty làm việc.
+  2. Bị động với dịch vụ trả sau: Mùng 1 Cloud tự động charge mà thẻ rỗng thì thất bại. Vài ngày sau Kế toán nạp tiền vào, Cloud **KHÔNG tự động trừ tiền lại**. 15 ngày sau service bị ngắt rụp. Tech lúc đó mới tá hỏa đi canh me "thẻ đủ tiền chưa" để login portal bấm thanh toán lại thủ công. Rủi ro sập Server là cực lớn.
 - **Câu hỏi cho Kế toán (Q):**
   1. Cụ thể kế hoạch nâng hạn mức thẻ lên 500tr hiện đang nằm ở bước nào, dự kiến ngày nào hoàn thành (ETA)?
   2. Tech Lead chịu trách nhiệm sinh tử cho hệ thống nhưng hoàn toàn "mù" số dư của cái thẻ đang nuôi Server. Trong thời gian chờ thẻ 500tr, Tài chính có thể **chủ động cảnh báo cho Tech** khi thẻ cán mốc 40tr không?
