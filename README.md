@@ -13,14 +13,41 @@ Quy trình fill data vào phiếu **Bảng kê chi phí** hàng tháng cho bộ 
 
 ## Quy trình xuất
 
+### Tính dự báo cuối tháng (End-of-Month Forecast)
+Đối với các chi phí đang chạy trong tháng hiện tại (Year-to-Date / Month-to-Date), áp dụng công thức sau để dự báo:
+- **Công thức:** `(Số tiền Ghi nhận hiện tại / Số ngày đã chạy) * 30`
+- **Ví dụ GCP tháng 4:** Nếu hôm nay là ngày 20, dữ liệu GCP tracking chốt đến ngày 19 (19 ngày) với số tiền là `2,202,967 VNĐ`. → Forecast = `(2,202,967 / 19) * 30 = 3,478,368.95 VNĐ`.
+*(Logic này sẽ được apply vào Dashboard và các script tính toán sau này).*
+
 ```
-1. Copy template gốc → output/Tech_Bảng kê chi phí_T{MM}.{YYYY}.xlsx
-2. Dùng openpyxl ghi data vào 2 sheets:
+1. Khoanh vùng chi phí (MTD Forecast nếu chưa có số chốt)
+2. Copy template gốc → 03_outputs/Tech_Bảng kê chi phí_T{MM}.{YYYY}.xlsx
+3. Dùng openpyxl ghi data vào 2 sheets:
    - Sheet 1: Phiếu đề nghị hoàn ứng (tổng hợp)
    - Sheet "Hồng Trinh (Không HĐ)": Bảng kê chi phí chi tiết (liệt kê từng khoản)
-3. Anh review file → xác nhận tỷ giá + format
-4. Gởi KT ✅
+4. Anh review file → xác nhận tỷ giá + format
+5. Gởi KT ✅
 ```
+
+## Policy: Yêu cầu từ Team Tài chính (18/04/2026)
+🔴 **THÔNG BÁO QUAN TRỌNG: TUÂN THỦ QUY TRÌNH PHÊ DUYỆT CHI PHÍ** 🔴
+
+Đối với tất cả các phát sinh dịch vụ/mua hàng (bao gồm **chi phí cloud/licenses hàng tháng thanh toán bằng thẻ Visa cá nhân**), BẮT BUỘC tuân thủ nguyên tắc **Tiền kiểm thay vì Hậu kiểm** thông qua Quy trình 2 bước:
+
+**BƯỚC 1: ĐỀ XUẤT TỔNG ĐẦU THÁNG (Approval Request)**
+- Thời gian: **Từ ngày 01 đến ngày 05** đầu mỗi tháng.
+- Hành động: Gửi **01 bản đề xuất tổng duy nhất** (tổng hợp kế hoạch chi tiêu/forecast của tất cả chi phí cố định trong tháng) lên System để duyệt. (Sẽ mất 2-3 ngày approve).
+- Phát sinh đột xuất: Chỉ chi phí bất khả kháng / rớt ngoài kế hoạch mới được làm đề xuất riêng lẻ giữa tháng.
+
+**BƯỚC 2: ĐỀ NGHỊ THANH TOÁN (Payment Request)**
+- Thời gian: Trong tháng, ngay sau khi có invoice/thực tế phát sinh.
+- Hành động: Link vào *Đề xuất tổng* (đã duyệt ở Bước 1) để làm từng Đề nghị thanh toán. Gửi kèm hóa đơn (Invoice) chính thức để Kế toán hoàn thiện hồ sơ và nộp thuế nhà thầu.
+- *Lưu ý: Dòng tiền được cân đối theo tuần nên cần chủ động lập hồ sơ sớm.*
+
+> ⚠️ **Rủi ro nghiêm trọng nếu làm sai:**
+> - Các khoản chi ngoài kế hoạch (chưa phê duyệt qua Bước 1) sẽ làm vỡ luồng cân đối dòng tiền của Cty.
+> - Bất kỳ ĐNTT nào lập *sau khi* đã mua/sử dụng dịch vụ mà chưa được duyệt sơ bộ đều bị **TỪ CHỐI THANH TOÁN**.
+> - Mọi xác nhận bằng miệng, tin nhắn, email đều **KHÔNG có giá trị pháp lý**. Chỉ duyệt qua System!
 
 ## Cấu trúc Excel Template
 
@@ -45,8 +72,10 @@ Quy trình fill data vào phiếu **Bảng kê chi phí** hàng tháng cho bộ 
 | `R9` | Số tiền tạm ứng | `0` |
 | `R10` | Số tiền còn phải thanh toán | `0` (đã trừ thẻ cty) |
 | `A19` | Người đề nghị | `Hiếu Lê` |
-| `K19` | Kế toán | `Võ Quốc Thắng` |
+| `K19` | Kế toán | `Dương Huỳnh Anh` *(Thay Võ Quốc Thắng từ 25/03)* |
 | `R19` | BOD phê duyệt | `Lê Thị Ngọc Anh` |
+
+> ⚠️ **LƯU Ý DEADLINE THÁNG**: Công ty đang siết thanh toán. Đề xuất kế hoạch chi tiêu tháng mới (Bước 1) thường có deadline vào khoảng **mùng 3-5 hàng tháng**. Các khoản ngoài kế hoạch nộp trễ sẽ bị loại trừ hoặc đẩy lùi sang tháng sau!
 
 ### Sheet "Hồng Trinh (Không HĐ)" — Bảng kê chi tiết (index 7)
 
@@ -114,7 +143,7 @@ Rename thành `Tech_BKCP_T{MM}` khi fill.
 Tech_Bảng kê chi phí_T{tháng}.{năm}.xlsx
 ```
 
-**File invoice** (trong `invoices/T{MM}.{YYYY}/`):
+**File invoice** (trong `01_inputs/invoices/T{MM}.{YYYY}/`):
 ```
 {Service}_{InvoiceID}.pdf|htm
 ```
@@ -123,17 +152,15 @@ Ví dụ: `Azure_G145113496.pdf`, `Google_A76357681460981268.htm`
 ## Cấu trúc thư mục
 ```
 Billing Management/
-├── templates/              # Template gốc — KHÔNG SỬA
-│   ├── Bảng kê chi phí.csv
-│   └── Bảng kê chi phí.xlsx
-├── invoices/               # Hóa đơn gốc
-│   ├── _upload/            # Upload tạm → rename + move
-│   ├── T02.2026/
-│   └── T03.2026/
-├── output/                 # File đã fill → gởi KT
-├── reference/              # Tài liệu tham khảo
+├── 01_inputs/
+│   ├── invoices/           # Hóa đơn gốc (_upload tạm, T02.2026...)
+│   └── templates/          # Template gốc — KHÔNG SỬA
+├── 02_analysis/
+│   └── notes/              # Ghi chú, tài liệu tham khảo, meeting notes
+├── 03_outputs/             # File đã fill → gởi KT, báo cáo tổng hợp
+├── dashboard/              # UI Code (React/NextJS) liên quan reporting
 ├── scripts/
 │   └── fill_expense.py
 ├── PROJECT.md
-└── WORKFLOW.md
+└── README.md
 ```

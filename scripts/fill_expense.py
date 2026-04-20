@@ -9,7 +9,7 @@ Usage:
 
 Ví dụ:
   python scripts/fill_expense.py "Bảng kê chi phí_filled.csv" --month 03 --year 2026
-  → Output: output/Tech_Bảng kê chi phí_T03.2026.xlsx
+  → Output: 03_outputs/Tech_Bảng kê chi phí_T03.2026.xlsx
 """
 
 import csv
@@ -126,13 +126,13 @@ def main():
     output_name = f"Tech_Bảng kê chi phí_T{args.month}.{args.year}.xlsx"
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_dir = os.path.dirname(script_dir)
-    output_path = os.path.join(project_dir, 'output', output_name)
+    output_path = os.path.join(project_dir, '03_outputs', output_name)
 
     # Check template
     template_path = args.template
     if not template_path:
         # Auto-detect template in templates/
-        default_template = os.path.join(project_dir, 'templates', 'Bảng kê chi phí.xlsx')
+        default_template = os.path.join(project_dir, '01_inputs', 'templates', 'Bảng kê chi phí.xlsx')
         if os.path.exists(default_template):
             template_path = default_template
 

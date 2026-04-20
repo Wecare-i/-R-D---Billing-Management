@@ -482,14 +482,12 @@ async function main() {
 
   // 2. Fetch all data in parallel (Azure + Google)
   console.log('📡 Fetching Azure Cost data...');
-  const [monthlyRows, dailyRows, resourceRows, forecast, m365Rows, googleData] = await Promise.all([
-    fetchMonthlyByService(token),
-    fetchDailyCost(token),
-    fetchTopResources(token),
-    fetchForecast(token),
-    fetchM365Costs(token),
-    fetchGoogleBilling()
-  ]);
+  const googleData = await fetchGoogleBilling();
+  const monthlyRows = await fetchMonthlyByService(token);
+  const dailyRows = await fetchDailyCost(token);
+  const resourceRows = await fetchTopResources(token);
+  const forecast = await fetchForecast(token);
+  const m365Rows = await fetchM365Costs(token);
 
   console.log(`   Monthly rows: ${monthlyRows.length}`);
   console.log(`   Daily rows: ${dailyRows.length}`);
