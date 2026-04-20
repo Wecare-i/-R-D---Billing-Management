@@ -31,3 +31,9 @@ Tài liệu này tổng hợp toàn bộ hiện trạng, quy định mới từ 
 ### 2.3 Mù thông tin số dư (Lack of Visibility)
 - Tech Lead là người quản lý nguồn sống của các Cloud Service bị gắn vào chiếc thẻ trên, nhưng lại **không được cấp quyền chủ động kiểm tra số dư khả dụng** của thẻ.
 - Mỗi lần hồi hộp tới chu kỳ trừ tiền, Tech lại phải lệ thuộc vào việc "nhờ Kế toán check giùm xem thẻ còn đủ tiền quẹt không" — gây phiền hà, mất thời gian, và tạo ra thế hoàn toàn bị động trong quản trị rủi ro hệ thống công nghệ.
+
+### 2.4 Cú vênh Tỷ giá: Thanh toán tiền USD nhưng Thẻ lại trừ tiền VND
+- **Bản chất giao dịch:** Hóa đơn gốc của hãng (Azure, M365, Google Workspace) xuất và yêu cầu thanh toán bằng **USD**, nhưng thẻ tín dụng của công ty khi quẹt lại **bị ngân hàng trừ bằng tiền VND**.
+- **Sự sai lệch lúc làm Đề xuất:** Khi Tech làm Đề xuất tổng (chốt số ngày 25 hoặc mùng 1), hệ thống chỉ cho phép nhập số VND tạm tính theo tỷ giá tham khảo. 
+- **Lúc trừ tiền thực tế:** Ngân hàng sẽ áp dụng **tỷ giá bán ngoại tệ của ngày quẹt thẻ + Phí chuyển đổi ngoại tệ**, dẫn đến số tiền VND bị trừ thực tế luôn bị "vênh" so với lúc dự báo.
+- **Hậu quả quy trình:** Kế toán thường yêu cầu "số tiền VND trên ĐNTT phải khớp y chang số đã trình duyệt trên Đề xuất". Điều này là **bất khả thi về mặt kỹ thuật** với các giao dịch quốc tế, gây kẹt hồ sơ thanh toán kéo dài.
