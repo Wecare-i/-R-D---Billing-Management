@@ -25,6 +25,23 @@ Dưới đây là danh sách các câu hỏi trọng tâm (đã được cấu t
   2. Tech Lead chịu trách nhiệm sinh tử cho hệ thống nhưng hoàn toàn "mù" số dư của cái thẻ đang nuôi Server. Trong thời gian chờ thẻ 500tr, Tài chính có thể **chủ động cảnh báo cho Tech** khi thẻ cán mốc 40tr không?
   3. Liệu Kế toán có giải pháp **tách riêng 1 thẻ (hoặc Thẻ ảo - Virtual Card)** chỉ chuyên chạy thanh toán Cloud cho Tech, cách ly hoàn toàn dòng tiền Ads của Marketing để tránh rủi ro sập Server bị động không?
 
+### Chủ đề 4: Thuế Nhà Thầu (FCT) & Hóa đơn Vendor Quốc tế
+- **Vấn đề đặt ra:** Các Vendor nước ngoài (Microsoft/Google) chỉ xuất Invoice điện tử (không mộc đỏ, không hóa đơn VAT VN). Việc nhập nhằng hồ sơ nộp Thuế nhà thầu (FCT) rủi ro làm chậm tiến độ ĐNTT.
+- **Câu hỏi cho Kế toán (Q):**
+  1. Với hóa đơn điện tử của Microsoft/Google, quy trình trích nộp Thuế nhà thầu (FCT) của Tài chính hiện tại đã được config tự động hóa chưa? Tech có bị ép phải xin thêm chứng từ hay giấy cư trú thuế nào vô lý từ hãng không?
+  2. Nếu hệ thống trả hồ sơ vì đòi "bằng chứng thanh toán", Tech screenshot màn hình Invoice Console (trạng thái Paid) là đủ căn cứ đúng không?
+
+### Chủ đề 5: Cơ chế "Cấp Cứu" (Emergency Escalation) cho Cost Spike
+- **Vấn đề đặt ra:** Policy có nêu rõ: "Mọi ĐNTT sau khi mua dịch vụ mà chưa được duyệt sơ bộ đều bị TỪ CHỐI THANH TOÁN".
+- **Câu hỏi cho Kế toán (Q):**
+  1. Nếu rạng sáng T7, CN hệ thống bị tấn công DDoS khiến băng thông (Bandwidth/CDN) vọt lên vài chục đô, hoặc xảy ra sự cố cần spin gấp 1 server phụ để cứu nét (vượt xa 10-15% Buffer). Khi Tech giải trình khẩn vào sáng T2, Kế toán có cơ chế Ngoại lệ (Exception Flow) cho việc này không? Hay vẫn cúp mỏ neo "Chưa trình duyệt trước -> Từ chối nạp tiền"?
+
+### Chủ đề 6: Cổ chai mã OTP khi Verify dịch vụ
+- **Vấn đề đặt ra:** Khi Tech ráp hạ tầng mới, luôn cần verify thẻ tín dụng qua OTP. Thời gian sống của mã OTP nước ngoài thường rất ngắn (1-3 phút).
+- **Câu hỏi cho Kế toán (Q):**
+  1. Ai là người đang cầm thiết bị / SĐT nhận mã OTP của cái thẻ 50tr này? 
+  2. Tài chính có cấp được kênh liên lạc ưu tiên nào để Tech gọi phát đọc OTP luôn không? Tech đã từng gặp cảnh chat chờ OTP tới mức timeout, thao tác lại nhiều lần bị ngầm xác định là thẻ rác / thẻ bị hack và khóa thẻ luôn trên hệ thống Microsoft.
+
 ---
 > [!TIP]
-> **Chiến lược chốt hạ:** Sau khi đưa ra 3 nhóm câu hỏi trên, anh có thể chốt lại với Kế toán nguyên tắc tối thượng: *"Yêu cầu của Tech không phải là muốn luồn lách quy trình duyệt, mà là xin một cơ chế đặc thù cho các dịch vụ cốt lõi của công ty (IT Core Services) để đảm bảo không bị đứng hệ thống, tiền trảm (duyệt forecast) - hậu tấu (quyết toán bằng invoice thật)."*
+> **Chiến lược chốt hạ:** Sau khi đưa ra 6 nhóm câu hỏi trên, anh có thể chốt lại với Kế toán nguyên tắc tối thượng: *"Yêu cầu của Tech không phải là muốn luồn lách quy trình duyệt, mà là xin một cơ chế đặc thù cho các dịch vụ cốt lõi của công ty (IT Core Services) để đảm bảo không bị đứng hệ thống, tiền trảm (duyệt forecast) - hậu tấu (quyết toán bằng invoice thật)."*
