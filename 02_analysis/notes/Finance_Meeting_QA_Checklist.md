@@ -36,12 +36,6 @@ Dưới đây là danh sách các câu hỏi trọng tâm (đã được cấu t
 - **Câu hỏi cho Kế toán (Q):**
   1. Nếu rạng sáng T7, CN hệ thống bị tấn công DDoS khiến băng thông (Bandwidth/CDN) vọt lên vài chục đô, hoặc xảy ra sự cố cần spin gấp 1 server phụ để cứu nét (vượt xa 10-15% Buffer). Khi Tech giải trình khẩn vào sáng T2, Kế toán có cơ chế Ngoại lệ (Exception Flow) cho việc này không? Hay vẫn cúp mỏ neo "Chưa trình duyệt trước -> Từ chối nạp tiền"?
 
-### Chủ đề 6: Cổ chai mã OTP khi Verify dịch vụ
-- **Vấn đề đặt ra:** Khi Tech ráp hạ tầng mới, luôn cần verify thẻ tín dụng qua OTP. Thời gian sống của mã OTP nước ngoài thường rất ngắn (1-3 phút).
-- **Câu hỏi cho Kế toán (Q):**
-  1. Ai là người đang cầm thiết bị / SĐT nhận mã OTP của cái thẻ 50tr này? 
-  2. Tài chính có cấp được kênh liên lạc ưu tiên nào để Tech gọi phát đọc OTP luôn không? Tech đã từng gặp cảnh chat chờ OTP tới mức timeout, thao tác lại nhiều lần bị ngầm xác định là thẻ rác / thẻ bị hack và khóa thẻ luôn trên hệ thống Microsoft.
-
 ---
 > [!TIP]
-> **Chiến lược chốt hạ:** Sau khi đưa ra 6 nhóm câu hỏi trên, anh có thể chốt lại với Kế toán nguyên tắc tối thượng: *"Yêu cầu của Tech không phải là muốn luồn lách quy trình duyệt, mà là xin một cơ chế đặc thù cho các dịch vụ cốt lõi của công ty (IT Core Services) để đảm bảo không bị đứng hệ thống, tiền trảm (duyệt forecast) - hậu tấu (quyết toán bằng invoice thật)."*
+> **Chiến lược chốt hạ:** Sau khi đưa ra 5 nhóm câu hỏi trên, anh có thể chốt lại với Kế toán nguyên tắc tối thượng: *"Yêu cầu của Tech không phải là muốn luồn lách quy trình duyệt, mà là xin một cơ chế đặc thù cho các dịch vụ cốt lõi của công ty (IT Core Services) để đảm bảo không bị đứng hệ thống, tiền trảm (duyệt forecast) - hậu tấu (quyết toán bằng invoice thật)."*
